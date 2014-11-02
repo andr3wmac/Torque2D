@@ -26,6 +26,7 @@
 #include "platformWin32/platformGL.h"
 #include "platform/platformVideo.h"
 #include "platformWin32/winOGLVideo.h"
+#include "platformWin32/winBGFXVideo.h"
 #include "platform/event.h"
 #include "console/console.h"
 #include "platformWin32/winConsole.h"
@@ -1592,7 +1593,8 @@ void Platform::initWindow(const Point2I &initialSize, const char *name)
    Video::init();
 
    PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
-   if ( Video::installDevice( OpenGLDevice::create() ) )
+   // andrewmac: switched to BGFX device.
+   if ( Video::installDevice( BGFXDevice::create() ) )
       Con::printf( "   Accelerated OpenGL display device detected." );
    else
       Con::printf( "   Accelerated OpenGL display device not detected." );
