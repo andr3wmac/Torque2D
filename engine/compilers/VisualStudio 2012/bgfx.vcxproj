@@ -65,7 +65,7 @@
       <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TORQUE_DEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>

@@ -89,7 +89,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>
+      </MultiProcessorCompilation>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4800;4100;4127;4512</DisableSpecificWarnings>
       <ShowIncludes>false</ShowIncludes>
