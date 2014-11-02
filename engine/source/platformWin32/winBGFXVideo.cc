@@ -885,20 +885,6 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    
    bgfx::setDebug(BGFX_DEBUG_TEXT);
 
-   bgfx::setViewClear(0
-		, BGFX_CLEAR_COLOR_BIT|BGFX_CLEAR_DEPTH_BIT
-		, 0x303030ff
-		, 1.0f
-		, 0
-		);
-
-   bgfx::setViewRect(0, 0, 0, width, height);
-   bgfx::submit(0);
-
-   bgfx::dbgTextPrintf(0, 1, 0x4f, "BGFX Running Inside Torque2D");
-   
-   bgfx::frame();
-
    return true;
 }
 
@@ -906,7 +892,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
 //------------------------------------------------------------------------------
 void BGFXDevice::swapBuffers()
 {
-   dwglSwapBuffers( winState.appDC );
+   bgfx::frame();
 }
 
 
@@ -989,173 +975,12 @@ bool BGFXDevice::setVerticalSync( bool on )
 //------------------------------------------------------------------------------
 DisplayDevice* BGFXDevice::create()
 {
-
-   // Get Bit Depth Switching Info.
-   enumerateBitDepths();
-
-   bool result = false;
-   bool fullScreenOnly = false;
-
-   //------------------------------------------------------------------------------
-   // This shouldn't happen, but just to be safe...
-   //------------------------------------------------------------------------------
-   if ( winState.hinstOpenGL )
-      GL_Shutdown();
-
-   //------------------------------------------------------------------------------
-   // Initialize GL
-   //------------------------------------------------------------------------------
-   if (!GL_Init( "opengl32", "glu32" ))
-      return NULL;
-
-   //------------------------------------------------------------------------------
-   // Create a test window to see if BGFX hardware acceleration is available:
-   //------------------------------------------------------------------------------
-   WNDCLASS wc;
-   dMemset(&wc, 0, sizeof(wc));
-   wc.style         = CS_OWNDC;
-   wc.lpfnWndProc   = DefWindowProc;
-   wc.hInstance     = winState.appInstance;
-   wc.lpszClassName = dT("OGLTest");
-   RegisterClass( &wc );
-
-   //------------------------------------------------------------------------------
-   // Create the Test Window
-   //------------------------------------------------------------------------------
-   //MIN_RESOLUTION defined in platformWin32/platformGL.h
-   HWND testWindow = CreateWindow( dT("OGLTest"),dT(""), WS_POPUP, 0, 0, MIN_RESOLUTION_X, MIN_RESOLUTION_Y, NULL, NULL, winState.appInstance, NULL );
-   if ( !testWindow )
-   {
-      // Unregister the Window Class
-      UnregisterClass( dT("OGLTest"), winState.appInstance );
-
-      // Shutdown GL
-      GL_Shutdown();
-
-      // Return Failure
-      return NULL;
-   }
-
-   //------------------------------------------------------------------------------
-   // Attempt to Grab a handle to the DeviceContext of our window.
-   //------------------------------------------------------------------------------
-   HDC testDC = GetDC( testWindow );
-   if ( !testDC )
-   {
-      // Destroy the Window
-      DestroyWindow( testWindow );
-
-      // Unregister the Window Class
-      UnregisterClass( dT("OGLTest"), winState.appInstance );
-
-      // Shutdown GL
-      GL_Shutdown();
-
-      // Return Failure.
-      return NULL;
-   }
-
-   //------------------------------------------------------------------------------
-   // Create Pixel Format ( Default 16bpp )
-   //------------------------------------------------------------------------------
-   PIXELFORMATDESCRIPTOR pfd;
-   CreatePixelFormat( &pfd, 16, 16, 8, false );
-
-
-   U32 chosenFormat = ChooseBestPixelFormat( testDC, &pfd );
-   if ( chosenFormat != 0 )
-   {
-      dwglDescribePixelFormat( testDC, chosenFormat, sizeof( pfd ), &pfd );
-
-      result = !( pfd.dwFlags & PFD_GENERIC_FORMAT );
-
-      if ( result && winState.desktopBitsPixel < 16 && !smCanDo32Bit)
-      {
-         // If Windows 95 cannot switch bit depth, it should only attempt 16-bit cards
-         // with a 16-bit desktop
-
-         // See if we can get a 32-bit pixel format:
-         PIXELFORMATDESCRIPTOR pfd;
-
-         CreatePixelFormat( &pfd, 32, 24, 8, false );
-         S32 chosenFormat = ChooseBestPixelFormat( testDC, &pfd );
-         if ( chosenFormat != 0 )
-         {
-            dwglDescribePixelFormat( winState.appDC, chosenFormat, sizeof( pfd ), &pfd );
-
-            if (pfd.cColorBits == 16)
-            {
-               Platform::AlertOK("Requires 16-Bit Desktop",
-                  "You must run in 16-bit color to run a Torque game.\nPlease quit the game, set your desktop color depth to 16-bit\nand then restart the application.");
-
-               result = false;
-            }
-         }
-      }
-   }
-   else if ( winState.desktopBitsPixel < 16 && smCanSwitchBitDepth )
-   {
-      // Try again after changing the display to 16-bit:
-      ReleaseDC( testWindow, testDC );
-      DestroyWindow( testWindow );
-
-      DEVMODE devMode;
-      dMemset( &devMode, 0, sizeof( devMode ) );
-      devMode.dmSize       = sizeof( devMode );
-      devMode.dmBitsPerPel = 16;
-      devMode.dmFields     = DM_BITSPERPEL;
-
-      U32 test = ChangeDisplaySettings( &devMode, 0 );
-      if ( test == DISP_CHANGE_SUCCESSFUL )
-      {
-    //MIN_RESOLUTION defined in platformWin32/platformGL.h
-         testWindow = CreateWindow( dT("OGLTest"), dT(""), WS_OVERLAPPED | WS_CAPTION, 0, 0, MIN_RESOLUTION_X, MIN_RESOLUTION_Y, NULL, NULL, winState.appInstance, NULL );
-         if ( testWindow )
-         {
-            testDC = GetDC( testWindow );
-            if ( testDC )
-            {
-               CreatePixelFormat( &pfd, 16, 16, 8, false );
-               chosenFormat = ChooseBestPixelFormat( testDC, &pfd );
-               if ( chosenFormat != 0 )
-               {
-                  dwglDescribePixelFormat( testDC, chosenFormat, sizeof( pfd ), &pfd );
-
-                  result = !( pfd.dwFlags & PFD_GENERIC_FORMAT );
-                  if ( result )
-                     fullScreenOnly = true;
-               }
-            }
-         }
-      }
-      ChangeDisplaySettings( NULL, 0 );
-   }
-   //------------------------------------------------------------------------------
-   // Can't do even 16 bit, alert user they need to upgrade.
-   //------------------------------------------------------------------------------
-   else if ( winState.desktopBitsPixel < 16 && !smCanSwitchBitDepth )
-   {
-      Platform::AlertOK("Requires 16-Bit Desktop", "You must run in 16-bit color to run a Torque game.\nPlease quit the game, set your desktop color depth to 16-bit\nand then restart the application.");
-   }
-
-   ReleaseDC( testWindow, testDC );
-   DestroyWindow( testWindow );
-
-   UnregisterClass( dT("OGLTest"), winState.appInstance );
-
-   GL_Shutdown();
-
-   if ( result )
-   {
-      BGFXDevice* newOGLDevice = new BGFXDevice();
-      if ( newOGLDevice )
-      {
-         newOGLDevice->mFullScreenOnly = fullScreenOnly;
-         return (DisplayDevice*) newOGLDevice;
-      }
-      else
-         return NULL;
-   }
-   else
-      return NULL;
+    BGFXDevice* newBGFXDevice = new BGFXDevice();
+    if ( newBGFXDevice )
+	{
+		newBGFXDevice->mFullScreenOnly = false;
+        return (DisplayDevice*) newBGFXDevice;
+	}
+    else
+        return NULL;
 }

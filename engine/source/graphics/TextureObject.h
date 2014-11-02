@@ -40,6 +40,10 @@
 #include "graphics/gBitmap.h"
 #endif
 
+#ifndef BGFX_H_HEADER_GUARD
+#include <bgfx.h>
+#endif
+
 //-----------------------------------------------------------------------------
 
 class GBitmap;
@@ -72,6 +76,9 @@ private:
     GLuint              mFilter;
     bool                mClamp;
 
+    U8*                 mTempBuf;
+    bgfx::TextureHandle mBGFXTexture;
+
     TextureHandle::TextureHandleType mHandleType;
 
 public:
@@ -92,6 +99,8 @@ public:
         mClamp( false ),
         mHandleType( TextureHandle::InvalidTexture )
     {
+       mTempBuf = NULL;
+       mBGFXTexture.idx = bgfx::invalidHandle;
     }
 
     inline StringTableEntry getTextureKey( void ) { return mTextureKey; }

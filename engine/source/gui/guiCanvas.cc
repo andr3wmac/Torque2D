@@ -34,6 +34,12 @@
 
 #include "guiCanvas_ScriptBinding.h"
 
+#include <bgfx.h>
+
+// TODO: MOVE THIS:
+#define BGFXCOLOR_RGBA(r,g,b,a) \
+   ((U32)((((r)&0xff)<<24)|(((g)&0xff)<<16)|(((b)&0xff)<<8)|((a)&0xff)))
+
 extern int _AndroidGetScreenWidth();
 extern int _AndroidGetScreenHeight();
 
@@ -1163,14 +1169,6 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
 {
    PROFILE_START(CanvasPreRender);
 
-#if !defined TORQUE_OS_IOS && !defined TORQUE_OS_ANDROID && !defined TORQUE_OS_EMSCRIPTEN
-    
-   if(mRenderFront)
-      glDrawBuffer(GL_FRONT);
-   else
-      glDrawBuffer(GL_BACK);
-#endif
-
    // Make sure the root control is the size of the canvas.
    Point2I size = Platform::getWindowSize();
 
@@ -1182,7 +1180,11 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
    }
 
    RectI screenRect(0, 0, size.x, size.y);
-
+   if ( mBounds != screenRect )
+   {
+      Con::printf("Screen Size Changed!");
+      bgfx::reset(size.x, size.y, BGFX_RESET_NONE);
+   }
    maintainSizing();
 
    //preRender (recursive) all controls
@@ -1194,14 +1196,6 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
    // for now, just always reset the update regions - this is a
    // fix for FSAA on ATI cards
    resetUpdateRegions();
-
-// Moved this below object integration for performance reasons. -JDD
-//   // finish the gl render so we don't get too far ahead of ourselves
-//#if defined(TORQUE_OS_WIN32)
-//   PROFILE_START(glFinish);
-//   glFinish();
-//   PROFILE_END();
-//#endif
 
    //draw the mouse, but not using tags...
    PROFILE_START(CanvasRenderControls);
@@ -1234,20 +1228,39 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
       addUpdateRegion(pos - Point2I(2, 2), Point2I(cext.x + 4, cext.y + 4));
    }
 
-    lastCursorON = cursorVisible;
-    lastCursor = mouseCursor;
-    lastCursorPt = cursorPos;
+   lastCursorON = cursorVisible;
+   lastCursor = mouseCursor;
+   lastCursorPt = cursorPos;
 
    RectI updateUnion;
    buildUpdateUnion(&updateUnion);
    if (updateUnion.intersect(screenRect))
    {
-    // Clear the background color if requested.
-    if ( mUseBackgroundColor )
-    {
-        glClearColor( mBackgroundColor.red, mBackgroundColor.green, mBackgroundColor.blue, mBackgroundColor.alpha );
-        glClear(GL_COLOR_BUFFER_BIT);	
-    }
+      // Clear the background color if requested.
+      if ( mUseBackgroundColor )
+      {
+         // TODO: This shouldn't be done every frame.
+         ColorI backgroundColorI(mBackgroundColor);
+
+         // TODO: Not sure if it matters, maybe not do this every frame?
+         bgfx::setViewClear(0
+		      , BGFX_CLEAR_COLOR_BIT|BGFX_CLEAR_DEPTH_BIT
+		      , BGFXCOLOR_RGBA(backgroundColorI.red, backgroundColorI.green, backgroundColorI.blue, backgroundColorI.alpha)
+		      , 1.0f
+		      , 0
+		   );
+
+         // TODO: This will *likely* be taken care of inside of the dglSetClipRect, but not sure yet.
+         bgfx::setViewRect(0, updateUnion.point.x, updateUnion.point.y, updateUnion.extent.x, updateUnion.extent.y);
+
+         // Dummy submit to ensure viewport is cleared.
+         bgfx::submit(0);
+
+         // BGFX Debug Test.
+         bgfx::dbgTextClear();
+         bgfx::dbgTextPrintf(0, 1, 0x4f, "BGFX Running Inside Torque2D");
+         bgfx::dbgTextPrintf(0, 2, 0x4f, "Width: %d Height: %d", screenRect.extent.x, screenRect.extent.y);
+      }
 
       //render the dialogs
       iterator i;
@@ -1333,16 +1346,8 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
 
    PROFILE_END();
 
-
    if( bufferSwap )
       swapBuffers();
-    
-//#if defined(TORQUE_OS_WIN32)
-//   PROFILE_START(glFinish);
-//   glFinish(); // This was changed to work with the D3D layer -pw
-//   PROFILE_END();
-//#endif
-
 }
 
 void GuiCanvas::swapBuffers()

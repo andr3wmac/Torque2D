@@ -591,7 +591,7 @@ void TextureManager::refresh( TextureObject* pTextureObject )
         return;
 
     // Sanity!
-    AssertISV( pTextureObject->mGLTextureName != 0, "Refreshing texture but no texture created." );
+    //AssertISV( pTextureObject->mGLTextureName != 0, "Refreshing texture but no texture created." );
     AssertISV( pTextureObject->mpBitmap != 0, "Refreshing texture but no bitmap available." );
 
     // Fetch bitmaps.
@@ -603,48 +603,9 @@ void TextureManager::refresh( TextureObject* pTextureObject )
 
     // Fetch source/dest formats.
     U32 sourceFormat, destFormat, byteFormat, texelSize;
-   
-#if defined(TORQUE_OS_EMSCRIPTEN)
-    if (pSourceBitmap->getFormat() == GBitmap::Alpha)
-    {
-        // special case: alpha should be converted to luminancealpha
-        bits = lumBits = getLuminanceAlphaBits(pNewBitmap);
-        sourceFormat = destFormat = GL_LUMINANCE_ALPHA;
-        byteFormat = GL_UNSIGNED_BYTE;
-        texelSize = 2;
-    }
-    else
-#endif
-    {
-        getSourceDestByteFormat(pSourceBitmap, &sourceFormat, &destFormat, &byteFormat, &texelSize);
-    }
-
-#if defined(TORQUE_OS_IOS)
-    bool isCompressed = (pNewBitmap->getFormat() >= GBitmap::PVR2) && (pNewBitmap->getFormat() <= GBitmap::PVR4A);
-#endif
-
-#if defined(TORQUE_OS_IOS)
-    if (isCompressed) {
-        switch (pNewBitmap->getFormat()) {
-            case GBitmap::PVR2:
-            case GBitmap::PVR2A:
-                glCompressedTexImage2D(GL_TEXTURE_2D, 0, byteFormat,
-                    pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, (getMax((int)pNewBitmap->getWidth(),16) * getMax((int)pNewBitmap->getHeight(), 8) * 2 + 7) / 8, pNewBitmap->getBits() );
-                break;
-            case GBitmap::PVR4:
-            case GBitmap::PVR4A:
-                glCompressedTexImage2D(GL_TEXTURE_2D, 0, byteFormat,
-                    pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, (getMax((int)pNewBitmap->getWidth(),8) * getMax((int)pNewBitmap->getHeight(), 8) * 4 + 7) / 8, pNewBitmap->getBits() );
-                break;
-            default:
-            // already tested for range of values, so default is just to keep the compiler happy!
-            break;
-        }
-    } else 
-#endif
-
+  
     // Bind texture.
-    glBindTexture( GL_TEXTURE_2D, pTextureObject->mGLTextureName );
+    //glBindTexture( GL_TEXTURE_2D, pTextureObject->mGLTextureName );
 
     // Are we forcing to 16-bit?
     if( pSourceBitmap->mForce16Bit )
@@ -672,18 +633,40 @@ void TextureManager::refresh( TextureObject* pTextureObject )
     }
     else
     {
-        // No, so upload as-is.
-        glTexImage2D(GL_TEXTURE_2D,
-            0,
-            destFormat,
-            pNewBitmap->getWidth(), pNewBitmap->getHeight(),
-            0,
-            sourceFormat,
-            byteFormat,
-            bits);
+       if ( pNewBitmap->getFormat() == GBitmap::BitmapFormat::RGBA )
+       {
+          // Convert to BGRA
+          U32 count = pNewBitmap->getWidth() * pNewBitmap->getHeight();
+          pTextureObject->mTempBuf = new U8[count * 4];
+          const U8* bits = pNewBitmap->getBits(0);
+          
+          U32 tmpPos = 0;
+          for(U32 n = 0; n < count; n+=3)
+          {
+             pTextureObject->mTempBuf[tmpPos] = bits[n + 2];
+             pTextureObject->mTempBuf[tmpPos + 1] = bits[n + 1];
+             pTextureObject->mTempBuf[tmpPos + 2] = bits[n];
+             pTextureObject->mTempBuf[tmpPos + 3] = bits[n + 3];
+             tmpPos += 4;
+          }
+
+          // Load Into BGFX
+          const bgfx::Memory* mem = bgfx::makeRef(pTextureObject->mTempBuf, count * 4);
+          pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_MIN_POINT|BGFX_TEXTURE_MAG_POINT|BGFX_TEXTURE_MIP_POINT, mem);
+       }
+
+       if ( pNewBitmap->getFormat() == GBitmap::BitmapFormat::Alpha )
+          pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, bgfx::TextureFormat::R8, BGFX_TEXTURE_MIN_POINT|BGFX_TEXTURE_MAG_POINT|BGFX_TEXTURE_MIP_POINT);
+
+       if ( pNewBitmap->getFormat() == GBitmap::BitmapFormat::RGB )
+          Con::printf("Failed to load BGFX texture, it's in RGB format.");
+
+       if ( pTextureObject->mBGFXTexture.idx == bgfx::invalidHandle )
+          Con::printf("Failed to load BGFX texture.");
     }
 
-    const GLuint filter = pTextureObject->getFilter();
+    // TODO: Translate into BGFX.
+    /*const GLuint filter = pTextureObject->getFilter();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 
@@ -695,6 +678,7 @@ void TextureManager::refresh( TextureObject* pTextureObject )
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glClamp );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glClamp );
+    */
 
     if(pNewBitmap != pSourceBitmap)
     {
@@ -740,6 +724,7 @@ void TextureManager::refresh( const char *textureName )
 
 //--------------------------------------------------------------------------------------------------------------------
 
+// TODO: Rename to createBGFXTexture
 void TextureManager::createGLName( TextureObject* pTextureObject )
 {
     // Finish if not appropriate.
@@ -752,7 +737,7 @@ void TextureManager::createGLName( TextureObject* pTextureObject )
     AssertISV( pTextureObject->mGLTextureName == 0, "GL texture name already exists." );
 
     // Generate texture name.
-    glGenTextures(1, &pTextureObject->mGLTextureName);
+    //glGenTextures(1, &pTextureObject->mGLTextureName);
 
     // Fetch source/dest formats.
     U32 sourceFormat, destFormat, byteFormat, texelSize;
