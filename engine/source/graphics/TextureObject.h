@@ -78,6 +78,7 @@ private:
 
     U8*                 mTempBuf;
     bgfx::TextureHandle mBGFXTexture;
+    U32                 mNVGImage;
 
     TextureHandle::TextureHandleType mHandleType;
 

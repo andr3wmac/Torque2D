@@ -30,6 +30,10 @@
 #include "platform/platformGL.h"
 #endif
 
+#ifndef NANOVG_H
+#include <nanovg.h>
+#endif
+
 class TextureObject;
 class GFont;
 class MatrixF;
@@ -355,5 +359,10 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 #endif
 
+// TODO: move this?
+static NVGcontext* nvgContext = NULL;
+NVGcontext* dglGetNVGContext();
+void dglBeginFrame();
+void dglEndFrame();
 
 #endif // _H_DGL

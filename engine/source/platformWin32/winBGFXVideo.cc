@@ -33,6 +33,8 @@
 
 #include <bgfx.h>
 #include <bgfxplatform.h>
+#include <nanovg.h>
+#include "graphics/dgl.h"
 
 //------------------------------------------------------------------------------
 
@@ -884,6 +886,14 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    bgfx::reset(width, height, BGFX_RESET_NONE);
    
    bgfx::setDebug(BGFX_DEBUG_TEXT);
+
+   // Loadup nanoVG + base fonts (TODO: replace this with proper font system)
+   NVGcontext* nvgContext = dglGetNVGContext();
+   nvgCreateFont(nvgContext, "sans", "fonts/roboto-regular.ttf");
+   nvgCreateFont(nvgContext, "lucida console", "fonts/lucon.ttf");
+   nvgCreateFont(nvgContext, "Arial", "fonts/arial.ttf");
+   nvgCreateFont(nvgContext, "Arial Bold", "fonts/arialbd.ttf");
+   nvgCreateFont(nvgContext, "Arial Italic", "fonts/ariali.ttf");
 
    return true;
 }

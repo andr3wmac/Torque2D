@@ -90,7 +90,7 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
    if(!dstRect.isValidRect())
       return;
    AssertFatal(srcRect.isValidRect() == true,
-               "GSurface::drawBitmapStretchSR: routines assume normal rects");
+               "GSurface::drawBitmapStretchSR: routiin nes assume normal rects");
 
    glDisable(GL_LIGHTING);
 
@@ -577,196 +577,27 @@ U32 dglDrawTextN(GFont*          font,
       return ptDraw.x;
    PROFILE_START(DrawText);
 
-   MatrixF rotMatrix( EulerF( 0.0, 0.0, mDegToRad( rot ) ) );
-   Point3F offset( (F32)ptDraw.x, (F32)ptDraw.y, 0.0f );
-   Point3F points[4];
+   NVGcontext* nvgContext = dglGetNVGContext();
+   UTF8* text = new UTF8[dStrlen(in_string)];
+   convertUTF16toUTF8(in_string, text, dStrlen(in_string));
 
-   U32 nCharCount = 0;
+   nvgFontSize(nvgContext, font->getHeight());
 
-   Point2I     pt;
-   UTF16       c;
-   pt.x                 = 0;
+   const char* faceName = font->getFontFaceName();
+   U32 fontID = nvgFindFont(nvgContext, faceName);
+   if ( fontID < 0 )
+      fontID = nvgFindFont(nvgContext, "sans");
 
-   ColorI                  currentColor;
-   S32                     currentPt = 0;
+	nvgFontFaceId(nvgContext, fontID);
+   if ( !colorTable )
+      nvgFillColor(nvgContext, nvgRGBA(0, 0, 0, 255));
+   else
+      nvgFillColor(nvgContext, nvgRGBA(colorTable[0].red, colorTable[0].green, colorTable[0].blue, colorTable[0].alpha));
+      
+   nvgTextAlign(nvgContext, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+	nvgText(nvgContext, ptDraw.x, ptDraw.y, text, NULL);
 
-   TextureObject *lastTexture = NULL;
-
-   currentColor      = sg_bitmapModulation;
-
-   FrameTemp<TextVertex> vert(4*n);
-
-   glDisable(GL_LIGHTING);
-
-   glEnable(GL_TEXTURE_2D);
-   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glEnable(GL_BLEND);
-
-   glEnableClientState ( GL_VERTEX_ARRAY );
-   glVertexPointer     ( 2, GL_FLOAT, sizeof(TextVertex), &(vert[0].p) );
-
-   glEnableClientState ( GL_COLOR_ARRAY );
-   glColorPointer      ( 4, GL_UNSIGNED_BYTE, sizeof(TextVertex), &(vert[0].c) );
-
-   glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-   glTexCoordPointer   ( 2, GL_FLOAT, sizeof(TextVertex), &(vert[0].t) );
-
-   // first build the point, color, and coord arrays
-   U32 i;
-
-   for(i = 0,c = in_string[i];in_string[i] && i < n;i++,c = in_string[i])
-   {
-      nCharCount++;
-      if(nCharCount > n)
-          break;
-
-      // We have to do a little dance here since \t = 0x9, \n = 0xa, and \r = 0xd
-      if ((c >=  1 && c <=  7) ||
-         (c >= 11 && c <= 12) ||
-         (c == 14))
-      {
-         // Color code
-         if (colorTable)
-         {
-            static U8 remap[15] =
-            {
-               0x0, // 0 special null terminator
-               0x0, // 1 ascii start-of-heading??
-               0x1, 
-               0x2, 
-               0x3, 
-               0x4, 
-               0x5, 
-               0x6, 
-               0x0, // 8 special backspace
-               0x0, // 9 special tab
-               0x0, // a special \n
-               0x7, 
-               0x8,
-               0x0, // a special \r
-               0x9 
-            };
-
-            U8 remapped = remap[c];
-            // Ignore if the color is greater than the specified max index:
-            if ( remapped <= maxColorIndex )
-            {
-               const ColorI &clr = colorTable[remapped];
-               sg_bitmapModulation = clr;
-               currentColor = clr;
-            }
-         }
-         continue;
-      }
-
-      // reset color?
-      if ( c == 15 )
-      {
-         currentColor = sg_textAnchorColor;
-         sg_bitmapModulation = sg_textAnchorColor;
-         continue;
-      }
-
-      // push color:
-      if ( c == 16 )
-      {
-         sg_stackColor = sg_bitmapModulation;
-         continue;
-      }
-
-      // pop color:
-      if ( c == 17 )
-      {
-         currentColor = sg_stackColor;
-         sg_bitmapModulation = sg_stackColor;
-         continue;
-      }
-
-      // Tab character
-      if ( c == dT('\t') ) 
-      {
-          const PlatformFont::CharInfo &ci = font->getCharInfo( dT(' ') );
-          pt.x += ci.xIncrement * GFont::TabWidthInSpaces;
-          continue;
-      }
-
-      if( !font->isValidChar( c ) )  
-         continue;
-
-      const PlatformFont::CharInfo &ci = font->getCharInfo(c);
-
-      if(ci.bitmapIndex == -1)
-      {
-         pt.x += ci.xOrigin + ci.xIncrement;
-         continue;
-      }
-
-      TextureObject *newObj = font->getTextureHandle(ci.bitmapIndex);
-      if(newObj != lastTexture)
-      {
-         if(currentPt)
-         {
-            glBindTexture(GL_TEXTURE_2D, lastTexture->getGLTextureName());
-            glDrawArrays( GL_QUADS, 0, currentPt );
-            currentPt = 0;
-         }
-         lastTexture = newObj;
-      }
-      if(ci.width != 0 && ci.height != 0)
-      {
-         pt.y = font->getBaseline() - ci.yOrigin;
-         pt.x += ci.xOrigin;
-
-         F32 texLeft   = F32(ci.xOffset)             / F32(lastTexture->getTextureWidth());
-         F32 texRight  = F32(ci.xOffset + ci.width)  / F32(lastTexture->getTextureWidth());
-         F32 texTop    = F32(ci.yOffset)             / F32(lastTexture->getTextureHeight());
-         F32 texBottom = F32(ci.yOffset + ci.height) / F32(lastTexture->getTextureHeight());
-
-         F32 screenLeft   = (F32)pt.x;
-         F32 screenRight  = (F32)(pt.x + ci.width);
-         F32 screenTop    = (F32)pt.y;
-         F32 screenBottom = (F32)(pt.y + ci.height);
-
-         points[0] = Point3F(screenLeft, screenBottom, 0.0);
-         points[1] = Point3F(screenRight,  screenBottom, 0.0);
-         points[2] = Point3F( screenRight,  screenTop, 0.0);
-         points[3] = Point3F( screenLeft, screenTop, 0.0);
-
-         for( int i=0; i<4; i++ )
-         {
-            rotMatrix.mulP( points[i] );
-            points[i] += offset;
-         }
-
-         vert[currentPt++].set(points[0].x, points[0].y, texLeft, texBottom, currentColor);
-         vert[currentPt++].set(points[1].x, points[1].y, texRight, texBottom, currentColor);
-         vert[currentPt++].set(points[2].x, points[2].y, texRight, texTop, currentColor);
-         vert[currentPt++].set(points[3].x, points[3].y, texLeft, texTop, currentColor);
-         pt.x += ci.xIncrement - ci.xOrigin;
-      }
-      else
-         pt.x += ci.xIncrement;
-   }
-   if(currentPt)
-   {
-      glBindTexture(GL_TEXTURE_2D, lastTexture->getGLTextureName());
-      glDrawArrays( GL_QUADS, 0, currentPt );
-   }
-
-   glDisableClientState ( GL_VERTEX_ARRAY );
-   glDisableClientState ( GL_COLOR_ARRAY );
-   glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
-
-   glDisable(GL_BLEND);
-   glDisable(GL_TEXTURE_2D);
-
-   pt.x += ptDraw.x; // DAW: Account for the fact that we removed the drawing point from the text start at the beginning.
-
-   AssertFatal(pt.x >= ptDraw.x, "How did this happen?");
-   PROFILE_END();
-
-   return pt.x - ptDraw.x;
+   return ptDraw.x;
 }
 #endif
 
@@ -848,26 +679,13 @@ void dglDrawRect(const RectI &rect, const ColorI &color, const float &lineWidth)
 
 void dglDrawRectFill(const Point2I &upperL, const Point2I &lowerR, const ColorI &color)
 {
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glDisable(GL_TEXTURE_2D);
-
-   glColor4ub(color.red, color.green, color.blue, color.alpha);
-#if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
-    GLfloat vertices[] = {
-        (GLfloat)upperL.x, (GLfloat)upperL.y,
-        (GLfloat)upperL.x, (GLfloat)lowerR.y,
-        (GLfloat)lowerR.x, (GLfloat)upperL.y,
-        (GLfloat)lowerR.x, (GLfloat)lowerR.y,
-    };
-    
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
-    glEnableClientState(GL_VERTEX_ARRAY);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-#else
-   glRecti((S32)upperL.x, (S32)upperL.y, (S32)lowerR.x, (S32)lowerR.y);
-#endif
+   NVGcontext* nvg = dglGetNVGContext();
+   if ( !nvg ) return;
+  
+   nvgBeginPath(nvg);
+	nvgRect(nvg, upperL.x, upperL.y, lowerR.x - upperL.x, lowerR.y - upperL.y);
+	nvgFillColor(nvg, nvgRGBA(color.red, color.green, color.blue, color.alpha));
+	nvgFill(nvg);
 }
 void dglDrawRectFill(const RectI &rect, const ColorI &color)
 {
@@ -1449,3 +1267,28 @@ bool dglCheckState(const S32 mvDepth, const S32 pDepth,
 GLfloat gVertexFloats[8];
 GLfloat gTextureVerts[8];
 #endif
+
+NVGcontext* dglGetNVGContext()
+{
+   if ( nvgContext != NULL )
+      return nvgContext;
+
+   bgfx::setViewSeq(1, true);
+
+   Point2I size = Platform::getWindowSize();
+   nvgContext = nvgCreate(size.x, size.y, 0, 1);
+   return nvgContext;
+}
+
+void dglBeginFrame()
+{
+   if ( !dglGetNVGContext() ) return;
+   Point2I size = Platform::getWindowSize();
+   nvgBeginFrame(nvgContext, size.x, size.y, 1.0f, NVG_STRAIGHT_ALPHA);
+}
+
+void dglEndFrame()
+{
+   if ( !dglGetNVGContext() ) return;
+   nvgEndFrame(nvgContext);
+}

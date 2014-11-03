@@ -1262,6 +1262,9 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
          bgfx::dbgTextPrintf(0, 2, 0x4f, "Width: %d Height: %d", screenRect.extent.x, screenRect.extent.y);
       }
 
+      // TODO: There should be a GUI pass specifically
+      dglBeginFrame();
+
       //render the dialogs
       iterator i;
       for(i = begin(); i != end(); i++)
@@ -1271,6 +1274,8 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
          glDisable( GL_CULL_FACE );
          contentCtrl->onRender(contentCtrl->getPosition(), updateUnion);
       }
+
+      dglEndFrame();
 
       // Tooltip resource
       if(bool(mMouseControl))

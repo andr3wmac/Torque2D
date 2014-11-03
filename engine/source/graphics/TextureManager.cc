@@ -36,6 +36,9 @@
 
 #include "TextureManager_ScriptBinding.h"
 
+#include <nanovg.h>
+#include "graphics/dgl.h"
+
 //---------------------------------------------------------------------------------------------------------------------
 
 S32 TextureManager::mMasterTextureKeyIndex = 0;
@@ -653,6 +656,9 @@ void TextureManager::refresh( TextureObject* pTextureObject )
           // Load Into BGFX
           const bgfx::Memory* mem = bgfx::makeRef(pTextureObject->mTempBuf, count * 4);
           pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_MIN_POINT|BGFX_TEXTURE_MAG_POINT|BGFX_TEXTURE_MIP_POINT, mem);
+       
+          // Load Into NanoVG
+          pTextureObject->mNVGImage = nvgCreateImageRGBA(dglGetNVGContext(), pNewBitmap->getWidth(), pNewBitmap->getHeight(), bits);
        }
 
        if ( pNewBitmap->getFormat() == GBitmap::BitmapFormat::Alpha )
