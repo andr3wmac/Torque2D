@@ -91,6 +91,14 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
       return;
    AssertFatal(srcRect.isValidRect() == true,
                "GSurface::drawBitmapStretchSR: routiin nes assume normal rects");
+   
+   NVGcontext* nvg = dglGetNVGContext();
+   NVGpaint imgPaint = nvgImagePattern(nvg, srcRect.point.x + dstRect.point.x, srcRect.point.y + dstRect.point.y, dstRect.extent.x, dstRect.extent.y, 0.0f, texture->getNVGImage(), 0);
+   nvgBeginPath(nvg);
+   nvgFillPaint(nvg, imgPaint);
+   nvgRect(nvg, dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y);
+   nvgFill(nvg);
+   return;
 
    glDisable(GL_LIGHTING);
 
@@ -578,8 +586,8 @@ U32 dglDrawTextN(GFont*          font,
    PROFILE_START(DrawText);
 
    NVGcontext* nvgContext = dglGetNVGContext();
-   UTF8* text = new UTF8[dStrlen(in_string)];
-   convertUTF16toUTF8(in_string, text, dStrlen(in_string));
+   UTF8* text = new UTF8[n];
+   convertUTF16toUTF8(in_string, text, n);
 
    nvgFontSize(nvgContext, font->getHeight());
 

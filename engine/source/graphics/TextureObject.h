@@ -117,6 +117,8 @@ public:
     inline S32 getTextureResidentSize( void ) const { return mTextureResidentSize; }
     inline S32 getBitmapResidentSize( void ) const { return mBitmapResidentSize; }
     inline TextureHandle::TextureHandleType getHandleType( void ) { return mHandleType; }
+
+    inline U32 getNVGImage( void ) { return mNVGImage; }
 };
 
 #endif // _TEXTURE_OBJECT_H_
