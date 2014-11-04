@@ -92,8 +92,20 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
    AssertFatal(srcRect.isValidRect() == true,
                "GSurface::drawBitmapStretchSR: routiin nes assume normal rects");
    
+   RectI testRectSrc;
+   testRectSrc.set(0, 0, 128, 128);
+   RectI testRectDest;
+   testRectDest.set(256, 256, 256, 256);
+
    NVGcontext* nvg = dglGetNVGContext();
-   NVGpaint imgPaint = nvgImagePattern(nvg, srcRect.point.x + dstRect.point.x, srcRect.point.y + dstRect.point.y, dstRect.extent.x, dstRect.extent.y, 0.0f, texture->getNVGImage(), 0);
+   
+   NVGpaint imgPaint = nvgImagePattern(nvg, 
+         dstRect.point.x - srcRect.point.x, 
+         dstRect.point.y - srcRect.point.y, 
+         texture->getTextureWidth() * (dstRect.extent.x / srcRect.extent.x), 
+         texture->getTextureHeight() * (dstRect.extent.y / srcRect.extent.y), 
+         0.0f, texture->getNVGImage(), 0);
+
    nvgBeginPath(nvg);
    nvgFillPaint(nvg, imgPaint);
    nvgRect(nvg, dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y);
