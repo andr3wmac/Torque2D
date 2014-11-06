@@ -1255,11 +1255,6 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
 
          // Dummy submit to ensure viewport is cleared.
          bgfx::submit(0);
-
-         // BGFX Debug Test.
-         bgfx::dbgTextClear();
-         bgfx::dbgTextPrintf(0, 1, 0x4f, "BGFX Running Inside Torque2D");
-         bgfx::dbgTextPrintf(0, 2, 0x4f, "Width: %d Height: %d", screenRect.extent.x, screenRect.extent.y);
       }
 
       // TODO: There should be a GUI pass specifically
@@ -1271,7 +1266,6 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
       {
          GuiControl *contentCtrl = static_cast<GuiControl*>(*i);
          dglSetClipRect(updateUnion);
-         glDisable( GL_CULL_FACE );
          contentCtrl->onRender(contentCtrl->getPosition(), updateUnion);
       }
 

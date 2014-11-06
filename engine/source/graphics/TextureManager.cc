@@ -621,7 +621,7 @@ void TextureManager::refresh( TextureObject* pTextureObject )
                                                 &GLformat, &GLdata_type,
                                                 pNewBitmap->getWidth(), pNewBitmap->getHeight() );
 
-        glTexImage2D(GL_TEXTURE_2D, 
+        /*glTexImage2D(GL_TEXTURE_2D, 
                         0,
                         GLformat,
                         pNewBitmap->getWidth(), pNewBitmap->getHeight(), 
@@ -630,7 +630,7 @@ void TextureManager::refresh( TextureObject* pTextureObject )
                         GLdata_type,
                         pBitmap16
                     );
-
+                    */
         //copy new texture_data into pBits
         delete [] pBitmap16;
     }
@@ -643,19 +643,20 @@ void TextureManager::refresh( TextureObject* pTextureObject )
           pTextureObject->mTempBuf = new U8[count * 4];
           const U8* bits = pNewBitmap->getBits(0);
           
-          U32 tmpPos = 0;
-          for(U32 n = 0; n < count; n+=3)
-          {
-             pTextureObject->mTempBuf[tmpPos] = bits[n + 2];
-             pTextureObject->mTempBuf[tmpPos + 1] = bits[n + 1];
-             pTextureObject->mTempBuf[tmpPos + 2] = bits[n];
-             pTextureObject->mTempBuf[tmpPos + 3] = bits[n + 3];
-             tmpPos += 4;
-          }
+		    U32 bytesPerPixel = 4;
+		    U32 pitch = pNewBitmap->getWidth() * bytesPerPixel;
 
-          // Load Into BGFX
-          const bgfx::Memory* mem = bgfx::makeRef(pTextureObject->mTempBuf, count * 4);
-          pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_MIN_POINT|BGFX_TEXTURE_MAG_POINT|BGFX_TEXTURE_MIP_POINT, mem);
+		    const bgfx::Memory* mem = NULL;
+			 mem = bgfx::alloc(pNewBitmap->getHeight() * pitch);
+			 bgfx::imageSwizzleBgra8(pNewBitmap->getWidth(), pNewBitmap->getHeight(), pitch, bits, mem->data);
+
+		    pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth()
+						   , pNewBitmap->getHeight()
+						   , 1
+						   , bgfx::TextureFormat::BGRA8
+						   , BGFX_TEXTURE_NONE
+						   , mem
+						   );
        
           // Load Into NanoVG
           pTextureObject->mNVGImage = nvgCreateImageRGBA(dglGetNVGContext(), pNewBitmap->getWidth(), pNewBitmap->getHeight(), bits);

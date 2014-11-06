@@ -34,6 +34,14 @@
 #include <nanovg.h>
 #endif
 
+#ifndef _FILEOBJECT_H_
+#include "io/fileObject.h"
+#endif
+
+#ifndef BGFX_H_HEADER_GUARD
+#include <bgfx.h>
+#endif
+
 class TextureObject;
 class GFont;
 class MatrixF;
@@ -362,7 +370,26 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 // TODO: move this?
 static NVGcontext* nvgContext = NULL;
 NVGcontext* dglGetNVGContext();
+
+static bgfx::UniformHandle u_texColor;
+static bgfx::ProgramHandle imageShader;
+static bgfx::ShaderHandle mPixelShader;
+static bgfx::ShaderHandle mVertexShader;
+static FileObject* mPixelShaderFile = NULL;
+static FileObject* mVertexShaderFile = NULL;
+void dglLoadShader();
+
 void dglBeginFrame();
 void dglEndFrame();
+void dglScreenQuad(U32 _x, U32 _y, U32 _width, U32 _height, bool _originBottomLeft = false);
+void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height, F32 _srcx, F32 _srcy, F32 _srcwidth, F32 _srcheight, F32 _srcimgwidth, F32 _srcimgheight, bool _originBottomLeft = false);
+
+struct PosUvVertex
+{
+	F32 m_x;
+	F32 m_y;
+	F32 m_u;
+	F32 m_v;
+};
 
 #endif // _H_DGL

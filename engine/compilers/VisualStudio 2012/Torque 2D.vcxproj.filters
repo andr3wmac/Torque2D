@@ -384,12 +384,6 @@
     <ClCompile Include="..\..\source\platformWin32\winFont.cc">
       <Filter>platformWin32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\platformWin32\winGL.cc">
-      <Filter>platformWin32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\platformWin32\winGLSpecial.cc">
-      <Filter>platformWin32</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\platformWin32\winInput.cc">
       <Filter>platformWin32</Filter>
     </ClCompile>
@@ -1426,6 +1420,12 @@
       <Filter>2d\sceneobject</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\platformWin32\winBGFXVideo.cc">
+      <Filter>platformWin32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\platformWin32\winGL.cc">
+      <Filter>platformWin32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\platformWin32\winGLSpecial.cc">
       <Filter>platformWin32</Filter>
     </ClCompile>
   </ItemGroup>
@@ -3030,9 +3030,6 @@
     <ClInclude Include="..\..\source\platformWin32\winExec_ScriptBinding.h">
       <Filter>platformWin32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\platformWin32\winGLSpecial_ScriptBinding.h">
-      <Filter>platformWin32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\platformWin32\winConsole_ScriptBinding.h">
       <Filter>platformWin32</Filter>
     </ClInclude>
@@ -3163,6 +3160,9 @@
       <Filter>2d\sceneobject</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\platformWin32\winBGFXVideo.h">
+      <Filter>platformWin32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\platformWin32\winGLSpecial_ScriptBinding.h">
       <Filter>platformWin32</Filter>
     </ClInclude>
   </ItemGroup>

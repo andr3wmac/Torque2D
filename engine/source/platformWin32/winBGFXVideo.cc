@@ -362,8 +362,6 @@ void BGFXDevice::initDevice()
 //------------------------------------------------------------------------------
 bool BGFXDevice::activate( U32 width, U32 height, U32 bpp, bool fullScreen )
 {
-   Con::printf( "Activating the BGFX display device..." );
-
    bool needResurrect = false;
 
    // If the rendering context exists, delete it:
@@ -413,10 +411,10 @@ bool BGFXDevice::activate( U32 width, U32 height, U32 bpp, bool fullScreen )
    }
 
    // If BGFX library already loaded, shut it down and reload it:
-   if ( winState.hinstOpenGL )
-      GL_Shutdown();
+   //if ( winState.hinstOpenGL )
+   //   GL_Shutdown();
 
-   GL_Init( "opengl32", "glu32" );
+   //GL_Init( "opengl32", "glu32" );
 
     static bool onceAlready = false;
     bool profiled = false;
@@ -461,16 +459,9 @@ bool BGFXDevice::activate( U32 width, U32 height, U32 bpp, bool fullScreen )
    mRestoreGamma = GetDeviceGammaRamp(winState.appDC, mOriginalRamp);
 
    // Output some driver info to the console:
-   const char* vendorString   = (const char*) glGetString( GL_VENDOR );
-   const char* rendererString = (const char*) glGetString( GL_RENDERER );
-   const char* versionString  = (const char*) glGetString( GL_VERSION );
-   Con::printf( "BGFX driver information:" );
-   if ( vendorString )
-      Con::printf( "  Vendor: %s", vendorString );
+   const char* rendererString = bgfx::getRendererName(bgfx::getRendererType());
    if ( rendererString )
-      Con::printf( "  Renderer: %s", rendererString );
-   if ( versionString )
-      Con::printf( "  Version: %s", versionString );
+      Con::printf( "Current Renderer: %s", rendererString );
 
    if ( needResurrect )
    {
@@ -613,7 +604,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    if ( !forceIt && newRes == smCurrentRes && newFullScreen == smIsFullScreen )
       return true;
 
-   Con::printf( "Setting screen mode to %dx%dx%d (%s)...", newRes.w, newRes.h, newRes.bpp, ( newFullScreen ? "fs" : "w" ) );
+   Con::printf( "   Setting screen mode to %dx%dx%d (%s)...", newRes.w, newRes.h, newRes.bpp, ( newFullScreen ? "fs" : "w" ) );
 
    bool needResurrect = false;
 
@@ -740,12 +731,11 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    }
 
    Con::setBoolVariable( "$pref::Video::fullScreen", smIsFullScreen );
-  
 
    bool newWindow = false;
    if ( !winState.appWindow )
    {
-      Con::printf( "[BGFX] Creating a new %swindow...", ( fullScreen ? "full-screen " : "" ) );
+      Con::printf( "   Creating a new %swindow...", ( fullScreen ? "full-screen " : "" ) );
       winState.appWindow = CreateOpenGLWindow( newRes.w, newRes.h, newFullScreen, true );
       if ( !winState.appWindow )
       {
@@ -803,7 +793,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    if ( !winState.appDC )
    {
       // Get a new device context:
-      Con::printf( "Acquiring a new device context..." );
+      Con::printf( "   Acquiring a new device context..." );
       winState.appDC = GetDC( winState.appWindow );
       if ( !winState.appDC )
       {
@@ -812,38 +802,6 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
       }
       newDeviceContext = true;
    }
-
-   if ( newWindow )
-   {
-      // Set the pixel format of the new window:
-      PIXELFORMATDESCRIPTOR pfd;
-      CreatePixelFormat( &pfd, newRes.bpp, 24, 8, false );
-      S32 chosenFormat = ChooseBestPixelFormat( winState.appDC, &pfd );
-      if ( !chosenFormat )
-      {
-         AssertFatal( false, "BGFXDevice::setScreenMode\nNo valid pixel formats found!" );
-         return false;
-      }
-      dwglDescribePixelFormat( winState.appDC, chosenFormat, sizeof( pfd ), &pfd );
-      if ( !SetPixelFormat( winState.appDC, chosenFormat, &pfd ) )
-      {
-         AssertFatal( false, "BGFXDevice::setScreenMode\nFailed to set the pixel format!" );
-         return false;
-      }
-      Con::printf( "Pixel format set:" );
-      Con::printf( "  %d color bits, %d depth bits, %d stencil bits", pfd.cColorBits, pfd.cDepthBits, pfd.cStencilBits );
-   }
-
-   if ( !winState.hGLRC )
-   {
-      
-   }
-
-   // Just for kicks.  Seems a relatively central place to put this...
-   //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-   if ( newDeviceContext && gGLState.suppSwapInterval )
-      setVerticalSync( !Con::getBoolVariable( "$pref::Video::disableVerticalSync" ) );
 
    smCurrentRes = newRes;
    Platform::setWindowSize( newRes.w, newRes.h );
@@ -874,18 +832,20 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
       }
    }
 
-    //Luma:	Clear window at first, as it is showing previous gl color buffer stuff.
-    //glClearColor(0.0f,0.0f,0.0f,0.0f);
-    //glClear(GL_COLOR_BUFFER_BIT);
+   Con::printf("");
+   Con::printSeparator();
+   Con::printf("Available Renderers:");
 
-    //if ( repaint )
-    //  Con::evaluate( "resetCanvas();" );
+   bgfx::RendererType::Enum renderers[bgfx::RendererType::Count];
+	U32 numRenderers = bgfx::getSupportedRenderers(renderers);
+   for (U32 n = 0; n < numRenderers; ++n)
+   {
+      Con::printf("   %s", bgfx::getRendererName(renderers[n]));
+   }
 
    bgfx::winSetHwnd(winState.appWindow);
-   bgfx::init();
+   bgfx::init(bgfx::RendererType::OpenGL);
    bgfx::reset(width, height, BGFX_RESET_NONE);
-   
-   bgfx::setDebug(BGFX_DEBUG_TEXT);
 
    // Loadup nanoVG + base fonts (TODO: replace this with proper font system)
    NVGcontext* nvgContext = dglGetNVGContext();
@@ -894,6 +854,11 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    nvgCreateFont(nvgContext, "Arial", "fonts/arial.ttf");
    nvgCreateFont(nvgContext, "Arial Bold", "fonts/arialbd.ttf");
    nvgCreateFont(nvgContext, "Arial Italic", "fonts/ariali.ttf");
+
+   // Load Image Shader.
+   imageShader.idx = bgfx::invalidHandle;
+   u_texColor.idx = bgfx::invalidHandle;
+   dglLoadShader();
 
    return true;
 }
@@ -909,26 +874,7 @@ void BGFXDevice::swapBuffers()
 //------------------------------------------------------------------------------
 const char* BGFXDevice::getDriverInfo()
 {
-   // Output some driver info to the console:
-   const char* vendorString   = (const char*) glGetString( GL_VENDOR );
-   const char* rendererString = (const char*) glGetString( GL_RENDERER );
-   const char* versionString  = (const char*) glGetString( GL_VERSION );
-   const char* extensionsString = (const char*) glGetString( GL_EXTENSIONS );
-
-   U32 bufferLen = ( vendorString ? dStrlen( vendorString ) : 0 )
-                 + ( rendererString ? dStrlen( rendererString ) : 0 )
-                 + ( versionString  ? dStrlen( versionString ) : 0 )
-                 + ( extensionsString ? dStrlen( extensionsString ) : 0 )
-                 + 4;
-
-   char* returnString = Con::getReturnBuffer( bufferLen );
-   dSprintf( returnString, bufferLen, "%s\t%s\t%s\t%s",
-         ( vendorString ? vendorString : "" ),
-         ( rendererString ? rendererString : "" ),
-         ( versionString ? versionString : "" ),
-         ( extensionsString ? extensionsString : "" ) );
-
-   return( returnString );
+   return( "" );
 }
 
 

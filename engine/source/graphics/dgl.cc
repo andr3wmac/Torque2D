@@ -35,6 +35,8 @@
 
 #include "dglMac_ScriptBinding.h"
 #include "dgl_ScriptBinding.h"
+#include <bgfx.h>
+#include <bx/fpumath.h>
 
 namespace {
 
@@ -44,7 +46,6 @@ ColorI sg_stackColor(255, 255, 255, 255);
 RectI sgCurrentClipRect;
 
 } // namespace {}
-
 
 //--------------------------------------------------------------------------
 void dglSetBitmapModulation(const ColorF& in_rColor)
@@ -91,158 +92,13 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
       return;
    AssertFatal(srcRect.isValidRect() == true,
                "GSurface::drawBitmapStretchSR: routiin nes assume normal rects");
-   
-   RectI testRectSrc;
-   testRectSrc.set(0, 0, 128, 128);
-   RectI testRectDest;
-   testRectDest.set(256, 256, 256, 256);
-
-   NVGcontext* nvg = dglGetNVGContext();
-   
-   NVGpaint imgPaint = nvgImagePattern(nvg, 
-         dstRect.point.x - srcRect.point.x, 
-         dstRect.point.y - srcRect.point.y, 
-         texture->getTextureWidth() * (dstRect.extent.x / srcRect.extent.x), 
-         texture->getTextureHeight() * (dstRect.extent.y / srcRect.extent.y), 
-         0.0f, texture->getNVGImage(), 0);
-
-   nvgBeginPath(nvg);
-   nvgFillPaint(nvg, imgPaint);
-   nvgRect(nvg, dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y);
-   nvgFill(nvg);
-   return;
-
-   glDisable(GL_LIGHTING);
-
-   glEnable(GL_TEXTURE_2D);
-   glBindTexture(GL_TEXTURE_2D, texture->getGLTextureName());
-   //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-   if (bSilhouette)
-   {
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-   
-      ColorF kModulationColor;
-      dglGetBitmapModulation(&kModulationColor);
-      glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, kModulationColor.address());
-   }
-   else
-   {
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   }
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-   F32 texLeft   = F32(srcRect.point.x)                    / F32(texture->getTextureWidth());
-   F32 texRight  = F32(srcRect.point.x + srcRect.extent.x) / F32(texture->getTextureWidth());
-   F32 texTop    = F32(srcRect.point.y)                    / F32(texture->getTextureHeight());
-   F32 texBottom = F32(srcRect.point.y + srcRect.extent.y) / F32(texture->getTextureHeight());
-     Point2F scrPoints[4];
-   if(fSpin == 0.0f)
-   {
-            scrPoints[0].x = (F32)dstRect.point.x;
-            scrPoints[0].y = (F32)dstRect.point.y;
-            scrPoints[1].x = (F32)(dstRect.point.x + dstRect.extent.x);
-            scrPoints[1].y = (F32)dstRect.point.y;
-            scrPoints[2].x = (F32)dstRect.point.x;
-            scrPoints[2].y = (F32)(dstRect.point.y + dstRect.extent.y);
-            scrPoints[3].x = (F32)(dstRect.point.x + dstRect.extent.x);
-            scrPoints[3].y = (F32)(dstRect.point.y + dstRect.extent.y);
-            //screenLeft   = dstRect.point.x;
-            //screenRight  = dstRect.point.x + dstRect.extent.x;
-            //screenTop    = dstRect.point.y;
-            //screenBottom = dstRect.point.y + dstRect.extent.y;
-        }
-        else
-   {
-     //WE NEED TO IMPLEMENT A FAST 2D ROTATION -- NOT THIS SLOWER 3D ROTATION
-     MatrixF rotMatrix( EulerF( 0.0, 0.0, mDegToRad(fSpin) ) );
-
-     Point3F offset( dstRect.point.x + dstRect.extent.x / 2.0f,
-                                         dstRect.point.y + dstRect.extent.y / 2.0f, 0.0 );
-         Point3F points[4];
-   
-     points[0] = Point3F(-dstRect.extent.x / 2.0f,  dstRect.extent.y / 2.0f, 0.0);
-     points[1] = Point3F( dstRect.extent.x / 2.0f,  dstRect.extent.y / 2.0f, 0.0);
-     points[2] = Point3F(-dstRect.extent.x / 2.0f, -dstRect.extent.y / 2.0f, 0.0);
-     points[3] = Point3F( dstRect.extent.x / 2.0f, -dstRect.extent.y / 2.0f, 0.0);
-
-     for( int i=0; i<4; i++ )
-     {
-        rotMatrix.mulP( points[i] );
-        points[i] += offset;
-        scrPoints[i].x = points[i].x;
-        scrPoints[i].y = points[i].y;
-     }
-   }
-  
-
-   if(in_flip & GFlip_X)
-   {
-      F32 temp = texLeft;
-      texLeft = texRight;
-      texRight = temp;
-   }
-   if(in_flip & GFlip_Y)
-   {
-      F32 temp = texTop;
-      texTop = texBottom;
-      texBottom = temp;
-   }
-
-   glColor4ub(sg_bitmapModulation.red,
-             sg_bitmapModulation.green,
-             sg_bitmapModulation.blue,
-             sg_bitmapModulation.alpha);
-
-#if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
-
-    GLfloat verts[] = {
-        (GLfloat)scrPoints[0].x, (GLfloat)scrPoints[0].y,
-        (GLfloat)scrPoints[1].x, (GLfloat)scrPoints[1].y,
-        (GLfloat)scrPoints[2].x, (GLfloat)scrPoints[2].y,
-        (GLfloat)scrPoints[3].x, (GLfloat)scrPoints[3].y,
-    };
-    GLfloat texVerts[] = {
-        (GLfloat)texLeft, (GLfloat)texTop,
-        (GLfloat)texRight, (GLfloat)texTop,		
-        (GLfloat)texLeft, (GLfloat)texBottom,
-        (GLfloat)texRight, (GLfloat)texBottom,
-    };
-    
-    
-    glDisableClientState(GL_COLOR_ARRAY);
-    //glDisableClientState(GL_POINT_SIZE_ARRAY_OES);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    
-    glVertexPointer(2, GL_FLOAT, 0, verts);
-    glTexCoordPointer(2, GL_FLOAT, 0, texVerts);
-    
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-#else
-   glBegin(GL_TRIANGLE_FAN);
-      glTexCoord2f(texLeft, texBottom);
-      glVertex2f(scrPoints[2].x, scrPoints[2].y);
-
-      glTexCoord2f(texRight, texBottom);
-      glVertex2f(scrPoints[3].x, scrPoints[3].y);
-
-      glTexCoord2f(texRight, texTop);
-      glVertex2f(scrPoints[1].x, scrPoints[1].y);
-
-      glTexCoord2f(texLeft, texTop);
-      glVertex2f(scrPoints[0].x, scrPoints[0].y);
-   glEnd();
-#endif
-   if (bSilhouette)
-   {
-      glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ColorF(0.0f, 0.0f, 0.0f, 0.0f).address());
-   }
-
-   glDisable(GL_BLEND);
-   glDisable(GL_TEXTURE_2D);
+ 
+   dglScreenQuadSrc(dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y,
+      srcRect.point.x, srcRect.point.y, srcRect.extent.x, srcRect.extent.y, texture->getTextureWidth(), texture->getTextureHeight());
+   bgfx::setTexture(0, u_texColor, texture->getBGFXTexture());
+	bgfx::setState(BGFX_STATE_RGB_WRITE|BGFX_STATE_ALPHA_WRITE);
+	bgfx::setProgram(imageShader);
+	bgfx::submit(1);
 }
 
 void dglDrawBitmap(TextureObject* texture, const Point2I& in_rAt, const U32 in_flip)
@@ -368,222 +224,6 @@ U32 dglDrawTextN(GFont*          font,
 
 //-----------------------------------------------------------------------------
 
-#if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
-U32 dglDrawTextN(GFont*          font,
-                 const Point2I&  ptDraw,
-                 const UTF16*    in_string,
-                 U32             n,
-                 const ColorI*   colorTable,
-                 const U32       maxColorIndex,
-                 F32             rot)
-
-{
-   // return on zero length strings
-   if( n < 1 )
-      return ptDraw.x;
-
-
-   MatrixF rotMatrix( EulerF( 0.0, 0.0, mDegToRad( rot ) ) );
-   Point3F offset( ptDraw.x, ptDraw.y, 0.0 );
-   Point3F points[4];
-
-   U32 nCharCount = 0;
-
-   Point2I     pt;
-   UTF16       c;
-   pt.x                 = 0;
-
-   ColorI                  currentColor;
-   S32                     currentPt = 0;
-
-   TextureObject *lastTexture = NULL;
-
-   currentColor      = sg_bitmapModulation;
-
-   FrameTemp<TextVertex> vert(4*n);
-
-   glDisable(GL_LIGHTING);
-
-   glEnable(GL_TEXTURE_2D);
-   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glEnable(GL_BLEND);
-
-   //Luma: Optimise by setting states once before inner loop
-   glEnableClientState ( GL_VERTEX_ARRAY );
-   glEnableClientState ( GL_COLOR_ARRAY );
-   glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-   glVertexPointer     ( 2, GL_FLOAT, sizeof(TextVertex), &(vert[0].p) );
-   glColorPointer      ( 4, GL_UNSIGNED_BYTE, sizeof(TextVertex), &(vert[0].c) );
-   glTexCoordPointer   ( 2, GL_FLOAT, sizeof(TextVertex), &(vert[0].t) );
-
-   // first build the point, color, and coord arrays
-   U32 i;
-
-   for(i = 0,c = in_string[i];in_string[i] && i < n;i++,c = in_string[i])
-   {
-      nCharCount++;
-      if(nCharCount > n)
-          break;
-
-      // We have to do a little dance here since \t = 0x9, \n = 0xa, and \r = 0xd
-      if ((c >=  1 && c <=  7) ||
-         (c >= 11 && c <= 12) ||
-         (c == 14))
-      {
-         // Color code
-         if (colorTable)
-         {
-            static U8 remap[15] =
-            {
-               0x0, // 0 special null terminator
-               0x0, // 1 ascii start-of-heading??
-               0x1, 
-               0x2, 
-               0x3, 
-               0x4, 
-               0x5, 
-               0x6, 
-               0x0, // 8 special backspace
-               0x0, // 9 special tab
-               0x0, // a special \n
-               0x7, 
-               0x8,
-               0x0, // a special \r
-               0x9 
-            };
-
-            U8 remapped = remap[c];
-            // Ignore if the color is greater than the specified max index:
-            if ( remapped <= maxColorIndex )
-            {
-               const ColorI &clr = colorTable[remapped];
-               sg_bitmapModulation = clr;
-               currentColor = clr;
-            }
-         }
-         continue;
-      }
-
-      // reset color?
-      if ( c == 15 )
-      {
-         currentColor = sg_textAnchorColor;
-         sg_bitmapModulation = sg_textAnchorColor;
-         continue;
-      }
-
-      // push color:
-      if ( c == 16 )
-      {
-         sg_stackColor = sg_bitmapModulation;
-         continue;
-      }
-
-      // pop color:
-      if ( c == 17 )
-      {
-         currentColor = sg_stackColor;
-         sg_bitmapModulation = sg_stackColor;
-         continue;
-      }
-
-      // Tab character
-      if ( c == dT('\t') ) 
-      {
-          const PlatformFont::CharInfo &ci = font->getCharInfo( dT(' ') );
-          pt.x += ci.xIncrement * GFont::TabWidthInSpaces;
-          continue;
-      }
-
-      if( !font->isValidChar( c ) )  
-         continue;
-
-      const PlatformFont::CharInfo &ci = font->getCharInfo(c);
-
-      if(ci.bitmapIndex == -1)
-      {
-         pt.x += ci.xOrigin + ci.xIncrement;
-         continue;
-      }
-
-      TextureObject *newObj = font->getTextureHandle(ci.bitmapIndex);
-      if(newObj != lastTexture)
-      {
-         if(currentPt)
-         {
-            glBindTexture(GL_TEXTURE_2D, lastTexture->getGLTextureName());
-
-            //Luma:	More optimal rendering
-            for (S32 i=0; i<currentPt; i+=4) 
-            {
-                glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
-            }
-            currentPt = 0;
-         }
-         lastTexture = newObj;
-      }
-      if(ci.width != 0 && ci.height != 0)
-      {
-         pt.y = font->getBaseline() - ci.yOrigin;
-         pt.x += ci.xOrigin;
-
-         F32 texLeft   = F32(ci.xOffset)             / F32(lastTexture->getTextureWidth());
-         F32 texRight  = F32(ci.xOffset + ci.width)  / F32(lastTexture->getTextureWidth());
-         F32 texTop    = F32(ci.yOffset)             / F32(lastTexture->getTextureHeight());
-         F32 texBottom = F32(ci.yOffset + ci.height) / F32(lastTexture->getTextureHeight());
-
-         F32 screenLeft   = pt.x;
-         F32 screenRight  = pt.x + ci.width;
-         F32 screenTop    = pt.y;
-         F32 screenBottom = pt.y + ci.height;
-
-         points[0] = Point3F(screenLeft, screenTop, 0.0);
-         points[1] = Point3F(screenRight,  screenTop, 0.0);
-         points[2] = Point3F( screenLeft,  screenBottom, 0.0);
-         points[3] = Point3F( screenRight, screenBottom, 0.0);
-
-         for( int i=0; i<4; i++ )
-         {
-            rotMatrix.mulP( points[i] );
-            points[i] += offset;
-         }
-         vert[currentPt++].set(points[0].x, points[0].y, texLeft, texTop, currentColor);
-         vert[currentPt++].set(points[1].x, points[1].y, texRight, texTop, currentColor);
-         vert[currentPt++].set(points[2].x, points[2].y, texLeft, texBottom, currentColor);
-         vert[currentPt++].set(points[3].x, points[3].y, texRight, texBottom, currentColor);
-         pt.x += ci.xIncrement - ci.xOrigin;
-      }
-      else
-         pt.x += ci.xIncrement;
-   }
-   if(currentPt)
-   {
-       //Luma:	More optimal rendering
-       glBindTexture(GL_TEXTURE_2D, lastTexture->getGLTextureName());
-       for (S32 i=0; i<currentPt; i+=4) 
-       {
-            glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
-       }
-   }
-
-   glDisableClientState ( GL_VERTEX_ARRAY );
-   glDisableClientState ( GL_COLOR_ARRAY );
-   glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
-
-   glDisable(GL_BLEND);
-   glDisable(GL_TEXTURE_2D);
-
-   pt.x += ptDraw.x; // DAW: Account for the fact that we removed the drawing point from the text start at the beginning.
-
-   AssertFatal(pt.x >= ptDraw.x, "How did this happen?");
-   PROFILE_END();
-
-   return pt.x - ptDraw.x;
-}
-
-#else
-
 U32 dglDrawTextN(GFont*          font,
                  const Point2I&  ptDraw,
                  const UTF16*    in_string,
@@ -598,8 +238,14 @@ U32 dglDrawTextN(GFont*          font,
    PROFILE_START(DrawText);
 
    NVGcontext* nvgContext = dglGetNVGContext();
-   UTF8* text = new UTF8[n];
-   convertUTF16toUTF8(in_string, text, n);
+   if ( !nvgContext ) return ptDraw.x;
+
+   // Need to pad this because the conversion doesn't
+   // seem to be clean, or at least the character count
+   // doesn't match. 4 was enough, but I chose 12 for 
+   // now in case there's strings that will need more.
+   UTF8* text = new UTF8[n + 12];
+   convertUTF16toUTF8(in_string, text, n + 12);
 
    nvgFontSize(nvgContext, font->getHeight());
 
@@ -619,14 +265,13 @@ U32 dglDrawTextN(GFont*          font,
 
    return ptDraw.x;
 }
-#endif
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- //
 // Drawing primitives
 
 void dglDrawLine(S32 x1, S32 y1, S32 x2, S32 y2, const ColorI &color)
 {
-   glEnable(GL_BLEND);
+/*   glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glDisable(GL_TEXTURE_2D);
 
@@ -648,7 +293,7 @@ void dglDrawLine(S32 x1, S32 y1, S32 x2, S32 y2, const ColorI &color)
     //glBegin(GL_POINTS);
     //glVertex2f((F32)x2 + 0.5, (F32)y2 + 0.5);
     //glEnd();
-#endif
+#endif*/
 }
 
 void dglDrawLine(const Point2I &startPt, const Point2I &endPt, const ColorI &color)
@@ -658,7 +303,7 @@ void dglDrawLine(const Point2I &startPt, const Point2I &endPt, const ColorI &col
 
 void dglDrawRect(const Point2I &upperL, const Point2I &lowerR, const ColorI &color, const float &lineWidth)
 {
-   glEnable(GL_BLEND);
+   /*glEnable(GL_BLEND);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glDisable(GL_TEXTURE_2D);
 
@@ -682,7 +327,7 @@ void dglDrawRect(const Point2I &upperL, const Point2I &lowerR, const ColorI &col
       glVertex2f((F32)lowerR.x + 0.5f, (F32)lowerR.y + 0.5f);
       glVertex2f((F32)upperL.x + 0.5f, (F32)lowerR.y + 0.5f);
    glEnd();
-#endif
+#endif*/
 }
 
 // the fill convention for lined rects is that they outline the rectangle border of the
@@ -715,7 +360,7 @@ void dglDrawRectFill(const RectI &rect, const ColorI &color)
 
 void dglDraw2DSquare( const Point2F &screenPoint, F32 width, F32 spinAngle )
 {
-   width *= 0.5;
+   /*width *= 0.5;
 
    MatrixF rotMatrix( EulerF( 0.0, 0.0, spinAngle ) );
 
@@ -770,12 +415,12 @@ void dglDraw2DSquare( const Point2F &screenPoint, F32 width, F32 spinAngle )
       glTexCoord2f(1.0, 0.0);
       glVertex2fv(points[3]);
    glEnd();
-#endif
+#endif*/
 }
 
 void dglDrawBillboard( const Point3F &position, F32 width, F32 spinAngle )
 {
-   MatrixF modelview;
+/*  MatrixF modelview;
    dglGetModelview( &modelview );
    modelview.transpose();
 
@@ -835,12 +480,12 @@ void dglDrawBillboard( const Point3F &position, F32 width, F32 spinAngle )
       glTexCoord2f(1.0, 1.0);
       glVertex3fv(points[3]);
    glEnd();
-#endif
+#endif*/
 }
 
 void dglWireCube(const Point3F & extent, const Point3F & center)
 {
-   static Point3F cubePoints[8] =
+/*   static Point3F cubePoints[8] =
    {
       Point3F(-1, -1, -1), Point3F(-1, -1,  1), Point3F(-1,  1, -1), Point3F(-1,  1,  1),
          Point3F( 1, -1, -1), Point3F( 1, -1,  1), Point3F( 1,  1, -1), Point3F( 1,  1,  1)
@@ -891,13 +536,13 @@ void dglWireCube(const Point3F & extent, const Point3F & center)
       }
       glEnd();
    }
-#endif
+#endif*/
 }
 
 
 void dglSolidCube(const Point3F & extent, const Point3F & center)
 {
-   static Point3F cubePoints[8] =
+/*   static Point3F cubePoints[8] =
    {
       Point3F(-1, -1, -1), Point3F(-1, -1,  1), Point3F(-1,  1, -1), Point3F(-1,  1,  1),
          Point3F( 1, -1, -1), Point3F( 1, -1,  1), Point3F( 1,  1, -1), Point3F( 1,  1,  1)
@@ -947,11 +592,12 @@ void dglSolidCube(const Point3F & extent, const Point3F & center)
       glEnd();
    }
 #endif
+   */
 }
 
 void dglSetClipRect(const RectI &clipRect)
 {
-   glMatrixMode(GL_PROJECTION);
+/*   glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
 
    U32 screenHeight = Platform::getWindowSize().y;
@@ -975,6 +621,7 @@ void dglSetClipRect(const RectI &clipRect)
               clipRect.extent.x, clipRect.extent.y);
 
    sgCurrentClipRect = clipRect;
+   */
 }
 
 const RectI& dglGetClipRect()
@@ -984,7 +631,7 @@ const RectI& dglGetClipRect()
 
 bool dglPointToScreen( Point3F &point3D, Point3F &screenPoint )
 {
-#if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
+/*#if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
    GLfloat       glMV[16];
    GLfloat       glPR[16];
    GLint          glVP[4];
@@ -1046,14 +693,15 @@ bool dglPointToScreen( Point3F &point3D, Point3F &screenPoint )
 
    return (result == GL_TRUE);
 #endif
-    
+    */
+   return false;
 }
 
 
 
 bool dglIsInCanonicalState()
 {
-   bool ret = true;
+ /*  bool ret = true;
 
    // Canonical state:
    //  BLEND disabled
@@ -1133,11 +781,14 @@ bool dglIsInCanonicalState()
       ret &= glIsEnabled(GL_FOG_COORDINATE_ARRAY_EXT) == GL_FALSE;
 #endif
    return ret;
+   */
+   return false;
 }
 
 
 void dglSetCanonicalState()
 {
+   /*
 #if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
 // PUAP -Mat removed unsupported textureARB and Fog stuff
    glDisable(GL_BLEND);
@@ -1186,6 +837,7 @@ void dglSetCanonicalState()
    if (dglDoesSupportFogCoord())
       glDisableClientState(GL_FOG_COORDINATE_ARRAY_EXT);
 #endif
+      */
 }
 
 void dglGetTransformState(S32* mvDepth,
@@ -1196,6 +848,7 @@ void dglGetTransformState(S32* mvDepth,
                           F32* t1Matrix,
                           S32* vp)
 {
+   /*
    glGetIntegerv(GL_MODELVIEW_STACK_DEPTH, (GLint*)mvDepth);
    glGetIntegerv(GL_PROJECTION_STACK_DEPTH, (GLint*)pDepth);
 
@@ -1229,6 +882,7 @@ void dglGetTransformState(S32* mvDepth,
    vp[1] = v.point.y;
    vp[2] = v.extent.x;
    vp[3] = v.extent.y;
+   */
 }
 
 
@@ -1237,6 +891,7 @@ bool dglCheckState(const S32 mvDepth, const S32 pDepth,
                    const S32 t1Depth, const F32* t1Matrix,
                    const S32* vp)
 {
+   /*
    GLint md, pd;
    RectI v;
 
@@ -1281,6 +936,9 @@ bool dglCheckState(const S32 mvDepth, const S32 pDepth,
             (v.point.y  == vp[1]) &&
             (v.extent.x == vp[2]) &&
             (v.extent.y == vp[3])));
+            */
+
+   return false;
 }
 
 #if defined(TORQUE_OS_IOS) || defined(TORQUE_OS_ANDROID) || defined(TORQUE_OS_EMSCRIPTEN)
@@ -1296,7 +954,7 @@ NVGcontext* dglGetNVGContext()
    bgfx::setViewSeq(1, true);
 
    Point2I size = Platform::getWindowSize();
-   nvgContext = nvgCreate(size.x, size.y, 0, 1);
+   nvgContext = nvgCreate(512, 512, 1, 1);
    return nvgContext;
 }
 
@@ -1304,11 +962,115 @@ void dglBeginFrame()
 {
    if ( !dglGetNVGContext() ) return;
    Point2I size = Platform::getWindowSize();
+
    nvgBeginFrame(nvgContext, size.x, size.y, 1.0f, NVG_STRAIGHT_ALPHA);
+
+   // GUI Orthographic Projection
+   float ortho[16];
+	bx::mtxOrtho(ortho, 0.0f, (float)size.x, (float)size.y, 0.0f, 0.0f, 1000.0f);
+	bgfx::setViewTransform(1, NULL, ortho);
+	bgfx::setViewRect(1, 0, 0, size.x, size.y);
 }
 
 void dglEndFrame()
 {
    if ( !dglGetNVGContext() ) return;
    nvgEndFrame(nvgContext);
+}
+
+void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height, 
+                      F32 _srcx, F32 _srcy, F32 _srcwidth, F32 _srcheight, F32 _srcimgwidth, F32 _srcimgheight,
+                      bool _originBottomLeft)
+{
+   bgfx::VertexDecl decl;
+   decl.begin();
+   decl.add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float);
+	decl.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float);
+	decl.end();
+
+	if (bgfx::checkAvailTransientVertexBuffer(6, decl) )
+	{
+		bgfx::TransientVertexBuffer vb;
+		bgfx::allocTransientVertexBuffer(&vb, 6, decl);
+		PosUvVertex* vertex = (PosUvVertex*)vb.data;
+
+		const float widthf  = float(_width);
+		const float heightf = float(_height);
+
+		const float minx = float(_x);
+		const float miny = float(_y);
+		const float maxx = minx+widthf;
+		const float maxy = miny+heightf;
+
+      F32 m_halfTexel = 0.0f;
+		const float texelHalfW = m_halfTexel/widthf;
+		const float texelHalfH = m_halfTexel/heightf;
+		const float minu = texelHalfW + (_srcx / _srcimgwidth);
+		const float maxu = ((_srcx + _srcwidth) / _srcimgwidth) - texelHalfW;
+		const float minv = _originBottomLeft ? texelHalfH + ((_srcy + _srcheight) / _srcimgheight) : texelHalfH + (_srcy / _srcimgheight);
+		const float maxv = _originBottomLeft ? texelHalfH + (_srcy / _srcimgheight) : texelHalfH + ((_srcy + _srcheight) / _srcimgheight);
+
+		vertex[0].m_x = minx;
+		vertex[0].m_y = miny;
+		vertex[0].m_u = minu;
+		vertex[0].m_v = minv;
+
+		vertex[1].m_x = maxx;
+		vertex[1].m_y = miny;
+		vertex[1].m_u = maxu;
+		vertex[1].m_v = minv;
+
+		vertex[2].m_x = maxx;
+		vertex[2].m_y = maxy;
+		vertex[2].m_u = maxu;
+		vertex[2].m_v = maxv;
+
+		vertex[3].m_x = maxx;
+		vertex[3].m_y = maxy;
+		vertex[3].m_u = maxu;
+		vertex[3].m_v = maxv;
+
+		vertex[4].m_x = minx;
+		vertex[4].m_y = maxy;
+		vertex[4].m_u = minu;
+		vertex[4].m_v = maxv;
+
+		vertex[5].m_x = minx;
+		vertex[5].m_y = miny;
+		vertex[5].m_u = minu;
+		vertex[5].m_v = minv;
+
+		bgfx::setVertexBuffer(&vb);
+	}
+}
+
+void dglScreenQuad(U32 _x, U32 _y, U32 _width, U32 _height, bool _originBottomLeft)
+{
+   dglScreenQuadSrc(_x, _y, _width, _height, 0, 0, _width, _height, _width, _height, _originBottomLeft);
+}
+
+void dglLoadShader()
+{
+   u_texColor = bgfx::createUniform("u_texColor", bgfx::UniformType::Uniform1i);
+
+   // Pixel (Fragment) Shader
+   mPixelShaderFile = new FileObject();
+   if ( mPixelShaderFile->readMemory("shaders/texture_fs.bin") )
+   {
+      const bgfx::Memory* mem = bgfx::makeRef(mPixelShaderFile->getBuffer(), mPixelShaderFile->getBufferSize());
+      mPixelShader = bgfx::createShader(mem);
+   }
+
+   // Vertex Shader
+   mVertexShaderFile = new FileObject();
+   if ( mVertexShaderFile->readMemory("shaders/texture_vs.bin") )
+   {
+      const bgfx::Memory* mem = bgfx::makeRef(mVertexShaderFile->getBuffer(), mVertexShaderFile->getBufferSize());
+      mVertexShader = bgfx::createShader(mem);
+   }
+
+   if ( mPixelShader.idx != bgfx::invalidHandle && mVertexShader.idx != bgfx::invalidHandle )
+   {
+      imageShader = bgfx::createProgram(mVertexShader, mPixelShader, true);
+   }
 }

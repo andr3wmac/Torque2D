@@ -1588,17 +1588,12 @@ void Platform::initWindow(const Point2I &initialSize, const char *name)
 {
    MSG msg;
 
-   Con::printSeparator();
-   Con::printf("Video Initialization:");
    Video::init();
 
    PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
-   // andrewmac: switched to BGFX device.
-   if ( Video::installDevice( BGFXDevice::create() ) )
-      Con::printf( "   Accelerated OpenGL display device detected." );
-   else
-      Con::printf( "   Accelerated OpenGL display device not detected." );
-   Con::printf( "" );
+
+   // andrewmac: Install BGFX device.
+   Video::installDevice( BGFXDevice::create() );
 
    gWindowCreated = true;
 #ifdef UNICODE

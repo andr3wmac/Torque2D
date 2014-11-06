@@ -180,7 +180,7 @@ bool Video::setDevice( const char *renderName, U32 width, U32 height, U32 bpp, b
    else
       Con::setBoolVariable("$pref::Video::appliedPref", true);
 
-   Con::printf( "Activating the %s display device...", renderName );
+   Con::printf( "   Activating the %s display device...", renderName );
    smCurrentDevice = smDeviceList[deviceIndex];
 
    smCritical = true;
@@ -200,12 +200,12 @@ bool Video::setDevice( const char *renderName, U32 width, U32 height, U32 bpp, b
    }
 
     // Show Maximum Texture Size reported by the graphics hardware.
-    GLint maxTextureSize;
+    /*GLint maxTextureSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     if ( maxTextureSize > 0 )
         Con::printf("Max Texture Size reported as: %d", maxTextureSize);
     else
-        Con::warnf("Max Texture Size reported as: %d !", maxTextureSize);
+        Con::warnf("Max Texture Size reported as: %d !", maxTextureSize);*/
 
    // The video mode activate may have failed above, return that status
    return( result );

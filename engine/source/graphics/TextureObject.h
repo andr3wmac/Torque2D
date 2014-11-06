@@ -119,6 +119,7 @@ public:
     inline TextureHandle::TextureHandleType getHandleType( void ) { return mHandleType; }
 
     inline U32 getNVGImage( void ) { return mNVGImage; }
+    inline bgfx::TextureHandle getBGFXTexture( void ) { return mBGFXTexture; }
 };
 
 #endif // _TEXTURE_OBJECT_H_

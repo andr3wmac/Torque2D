@@ -637,7 +637,7 @@ void GuiControl::renderChildControls(Point2I offset, const RectI &updateRect)
          if (childClip.intersect(clipRect))
          {
             dglSetClipRect(childClip);
-            glDisable(GL_CULL_FACE);
+            //glDisable(GL_CULL_FACE);
             ctrl->onRender(childPosition, childClip);
          }
       }
