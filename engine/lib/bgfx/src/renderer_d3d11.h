@@ -13,72 +13,27 @@
 #	define BGFX_CONFIG_DEBUG_PIX 0
 #endif // !USE_D3D11_DYNAMIC_LIB
 
+BX_PRAGMA_DIAGNOSTIC_PUSH();
+BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG("-Wunknown-pragmas" );
+BX_PRAGMA_DIAGNOSTIC_IGNORED_GCC("-Wpragmas");
+BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4005) // warning C4005: '' : macro redefinition
 #define D3D11_NO_HELPERS
-#if BX_COMPILER_MSVC
-#	pragma warning(push)
-//  winerror.h and dxgitypes.h both define DXGI_ERRORs.
-#	pragma warning(disable:4005) // warning C4005: '' : macro redefinition
-#	include <d3d11.h>
-#	pragma warning(pop)
-#else
-#	include <d3d11.h>
-#endif // BX_COMPILER_MSVC
-#include "renderer_d3d.h"
+#include <d3d11.h>
+BX_PRAGMA_DIAGNOSTIC_POP()
 
-#define D3DCOLOR_ARGB(_a, _r, _g, _b) ( (DWORD)( ( ( (_a)&0xff)<<24)|( ( (_r)&0xff)<<16)|( ( (_g)&0xff)<<8)|( (_b)&0xff) ) )
-#define D3DCOLOR_RGBA(_r, _g, _b, _a) D3DCOLOR_ARGB(_a, _r, _g, _b)
+#include "renderer_d3d.h"
+#include "ovr.h"
+
+#ifndef D3DCOLOR_ARGB
+#	define D3DCOLOR_ARGB(_a, _r, _g, _b) ( (DWORD)( ( ( (_a)&0xff)<<24)|( ( (_r)&0xff)<<16)|( ( (_g)&0xff)<<8)|( (_b)&0xff) ) )
+#endif // D3DCOLOR_ARGB
+
+#ifndef D3DCOLOR_RGBA
+#	define D3DCOLOR_RGBA(_r, _g, _b, _a) D3DCOLOR_ARGB(_a, _r, _g, _b)
+#endif // D3DCOLOR_RGBA
 
 namespace bgfx
 {
-	typedef HRESULT (WINAPI * PFN_CREATEDXGIFACTORY)(REFIID _riid, void** _factory);
-
-	template <typename Ty>
-	class StateCacheT
-	{
-	public:
-		void add(uint64_t _id, Ty* _item)
-		{
-			invalidate(_id);
-			m_hashMap.insert(stl::make_pair(_id, _item) );
-		}
-
-		Ty* find(uint64_t _id)
-		{
-			HashMap::iterator it = m_hashMap.find(_id);
-			if (it != m_hashMap.end() )
-			{
-				return it->second;
-			}
-
-			return NULL;
-		}
-
-		void invalidate(uint64_t _id)
-		{
-			HashMap::iterator it = m_hashMap.find(_id);
-			if (it != m_hashMap.end() )
-			{
-				DX_RELEASE_WARNONLY(it->second, 0);
-				m_hashMap.erase(it);
-			}
-		}
-
-		void invalidate()
-		{
-			for (HashMap::iterator it = m_hashMap.begin(), itEnd = m_hashMap.end(); it != itEnd; ++it)
-			{
-				DX_CHECK_REFCOUNT(it->second, 1);
-				it->second->Release();
-			}
-
-			m_hashMap.clear();
-		}
-
-	private:
-		typedef stl::unordered_map<uint64_t, Ty*> HashMap;
-		HashMap m_hashMap;
-	};
-
 	struct IndexBufferD3D11
 	{
 		IndexBufferD3D11()
@@ -273,18 +228,22 @@ namespace bgfx
 	struct FrameBufferD3D11
 	{
 		FrameBufferD3D11()
-			: m_num(0)
+			: m_denseIdx(UINT16_MAX)
+			, m_num(0)
 		{
 		}
 
 		void create(uint8_t _num, const TextureHandle* _handles);
-		void destroy();
+		void create(uint16_t _denseIdx, void* _nwh, uint32_t _width, uint32_t _height, TextureFormat::Enum _depthFormat);
+		uint16_t destroy();
 		void resolve();
-		void clear(const Clear& _clear);
+		void clear(const Clear& _clear, const float _palette[][4]);
 
 		ID3D11RenderTargetView* m_rtv[BGFX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS-1];
 		ID3D11ShaderResourceView* m_srv[BGFX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS-1];
 		ID3D11DepthStencilView* m_dsv;
+		IDXGISwapChain* m_swapChain;
+		uint16_t m_denseIdx;
 		uint8_t m_num;
 	};
 

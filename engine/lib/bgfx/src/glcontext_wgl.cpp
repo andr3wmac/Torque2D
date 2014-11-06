@@ -24,6 +24,38 @@ namespace bgfx
 #	define GL_IMPORT(_optional, _proto, _func, _import) _proto _func
 #	include "glimports.h"
 
+	struct SwapChainGL
+	{
+		SwapChainGL(void* _nwh)
+			: m_hwnd( (HWND)_nwh)
+		{
+			m_hdc = GetDC(m_hwnd);
+		}
+
+		~SwapChainGL()
+		{
+			wglMakeCurrent(NULL, NULL);
+			wglDeleteContext(m_context);
+			ReleaseDC(m_hwnd, m_hdc);
+		}
+
+		void makeCurrent()
+		{
+			wglMakeCurrent(m_hdc, m_context);
+			GLenum err = glGetError();
+			BX_WARN(0 == err, "wglMakeCurrent failed with GL error: 0x%04x.", err); BX_UNUSED(err);
+		}
+
+		void swapBuffers()
+		{
+			SwapBuffers(m_hdc);
+		}
+
+		HWND  m_hwnd;
+		HDC   m_hdc;
+		HGLRC m_context;
+	};
+
 	static HGLRC createContext(HDC _hdc)
 	{
 		PIXELFORMATDESCRIPTOR pfd;
@@ -121,10 +153,10 @@ namespace bgfx
 
 			HGLRC context = createContext(hdc);
 
-			wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
-			wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+			wglGetExtensionsStringARB  = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
+			wglChoosePixelFormatARB    = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
 			wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-			wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+			wglSwapIntervalEXT         = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 
 			if (NULL != wglGetExtensionsStringARB)
 			{
@@ -151,11 +183,10 @@ namespace bgfx
 				};
 
 				int result;
-				int pixelFormat;
 				uint32_t numFormats = 0;
 				do 
 				{
-					result = wglChoosePixelFormatARB(m_hdc, attrs, NULL, 1, &pixelFormat, &numFormats);
+					result = wglChoosePixelFormatARB(m_hdc, attrs, NULL, 1, &m_pixelFormat, &numFormats);
 					if (0 == result
 						||  0 == numFormats)
 					{
@@ -165,8 +196,7 @@ namespace bgfx
 
 				} while (0 == numFormats);
 
-				PIXELFORMATDESCRIPTOR pfd;
-				DescribePixelFormat(m_hdc, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+				DescribePixelFormat(m_hdc, m_pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &m_pfd);
 
 				BX_TRACE("Pixel format:\n"
 					"\tiPixelType %d\n"
@@ -174,14 +204,14 @@ namespace bgfx
 					"\tcAlphaBits %d\n"
 					"\tcDepthBits %d\n"
 					"\tcStencilBits %d\n"
-					, pfd.iPixelType
-					, pfd.cColorBits
-					, pfd.cAlphaBits
-					, pfd.cDepthBits
-					, pfd.cStencilBits
+					, m_pfd.iPixelType
+					, m_pfd.cColorBits
+					, m_pfd.cAlphaBits
+					, m_pfd.cDepthBits
+					, m_pfd.cStencilBits
 					);
 
-				result = SetPixelFormat(m_hdc, pixelFormat, &pfd);
+				result = SetPixelFormat(m_hdc, m_pixelFormat, &m_pfd);
 				// When window is created by SDL and SDL_WINDOW_OPENGL is set SetPixelFormat
 				// will fail. Just warn and continue. In case it failed for some other reason
 				// create context will fail and it will error out there.
@@ -213,6 +243,9 @@ namespace bgfx
 					m_context = wglCreateContextAttribsARB(m_hdc, 0, contextAttrs);
 				}
 				BGFX_FATAL(NULL != m_context, Fatal::UnableToInitialize, "Failed to create context 0x%08x.", GetLastError() );
+
+				BX_STATIC_ASSERT(sizeof(contextAttrs) == sizeof(m_contextAttrs) );
+				memcpy(m_contextAttrs, contextAttrs, sizeof(contextAttrs) );
 			}
 
 			wglMakeCurrent(NULL, NULL);
@@ -261,12 +294,56 @@ namespace bgfx
 		}
 	}
 
-	void GlContext::swap()
+	bool GlContext::isSwapChainSupported()
 	{
-		if (NULL != g_bgfxHwnd)
+		return true;
+	}
+
+	SwapChainGL* GlContext::createSwapChain(void* _nwh)
+	{
+		SwapChainGL* swapChain = BX_NEW(g_allocator, SwapChainGL)(_nwh);
+
+		int result = SetPixelFormat(swapChain->m_hdc, m_pixelFormat, &m_pfd);
+		BX_WARN(result, "SetPixelFormat failed (last err: 0x%08x)!", GetLastError() ); BX_UNUSED(result);
+
+		swapChain->m_context = wglCreateContextAttribsARB(swapChain->m_hdc, m_context, m_contextAttrs);
+		BX_CHECK(NULL != swapChain->m_context, "Create swap chain failed: %x", glGetError() );
+		return swapChain;
+	}
+
+	void GlContext::destorySwapChain(SwapChainGL*  _swapChain)
+	{
+		BX_DELETE(g_allocator, _swapChain);
+	}
+
+	void GlContext::makeCurrent(SwapChainGL* _swapChain)
+	{
+		if (NULL == _swapChain)
 		{
 			wglMakeCurrent(m_hdc, m_context);
-			SwapBuffers(m_hdc);
+			GLenum err = glGetError();
+			BX_WARN(0 == err, "wglMakeCurrent failed with GL error: 0x%04x.", err); BX_UNUSED(err);
+		}
+		else
+		{
+			_swapChain->makeCurrent();
+		}
+	}
+
+	void GlContext::swap(SwapChainGL* _swapChain)
+	{
+		if (NULL == _swapChain)
+		{
+			if (NULL != g_bgfxHwnd)
+			{
+				wglMakeCurrent(m_hdc, m_context);
+				SwapBuffers(m_hdc);
+			}
+		}
+		else
+		{
+			_swapChain->makeCurrent();
+			_swapChain->swapBuffers();
 		}
 	}
 

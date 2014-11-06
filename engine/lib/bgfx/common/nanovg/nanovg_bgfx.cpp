@@ -763,23 +763,30 @@ namespace
 	static int glnvg__allocPaths(struct GLNVGcontext* gl, int n)
 	{
 		int ret = 0;
-		if (gl->npaths+n > gl->cpaths)
-		{
-			gl->cpaths = gl->cpaths == 0 ? glnvg__maxi(n, 32) : gl->cpaths * 2;
-			gl->paths = (struct GLNVGpath*)realloc(gl->paths, sizeof(struct GLNVGpath) * gl->cpaths);
+		if (gl->npaths + n > gl->cpaths) {
+			GLNVGpath* paths;
+			int cpaths = glnvg__maxi(gl->npaths + n, 128) + gl->cpaths / 2; // 1.5x Overallocate
+			paths = (GLNVGpath*)realloc(gl->paths, sizeof(GLNVGpath) * cpaths);
+			if (paths == NULL) return -1;
+			gl->paths = paths;
+			gl->cpaths = cpaths;
 		}
 		ret = gl->npaths;
 		gl->npaths += n;
 		return ret;
 	}
 
-	static int glnvg__allocVerts(struct GLNVGcontext* gl, int n)
+	static int glnvg__allocVerts(GLNVGcontext* gl, int n)
 	{
 		int ret = 0;
 		if (gl->nverts+n > gl->cverts)
 		{
-			gl->cverts = gl->cverts == 0 ? glnvg__maxi(n, 256) : gl->cverts * 2;
-			gl->verts = (struct NVGvertex*)realloc(gl->verts, sizeof(struct NVGvertex) * gl->cverts);
+			NVGvertex* verts;
+			int cverts = glnvg__maxi(gl->nverts + n, 4096) + gl->cverts/2; // 1.5x Overallocate
+			verts = (NVGvertex*)realloc(gl->verts, sizeof(NVGvertex) * cverts);
+			if (verts == NULL) return -1;
+			gl->verts = verts;
+			gl->cverts = cverts;
 		}
 		ret = gl->nverts;
 		gl->nverts += n;

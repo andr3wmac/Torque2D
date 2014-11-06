@@ -49,6 +49,11 @@ namespace entry
 			m_app->userData = (void*)this;
 			m_app->onAppCmd = onAppCmdCB;
 			m_app->onInputEvent = onInputEventCB;
+			ANativeActivity_setWindowFlags(m_app->activity, 0
+				| AWINDOW_FLAG_FULLSCREEN
+				| AWINDOW_FLAG_KEEP_SCREEN_ON
+				, 0
+				);
 
 			const char* argv[1] = { "android.so" };
 			m_mte.m_argc = 1;
@@ -200,28 +205,51 @@ namespace entry
 		return s_ctx.m_eventQueue.poll();
 	}
 
+	const Event* poll(WindowHandle _handle)
+	{
+		return s_ctx.m_eventQueue.poll(_handle);
+	}
+
 	void release(const Event* _event)
 	{
 		s_ctx.m_eventQueue.release(_event);
 	}
 
-	void setWindowSize(uint32_t _width, uint32_t _height)
+	WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags, const char* _title)
 	{
-		BX_UNUSED(_width, _height);
+		BX_UNUSED(_x, _y, _width, _height, _flags, _title);
+		WindowHandle handle = { UINT16_MAX };
+		return handle;
 	}
 
-	void setWindowTitle(const char* _title)
+	void destroyWindow(WindowHandle _handle)
 	{
-		BX_UNUSED(_title);
+		BX_UNUSED(_handle);
 	}
 
-	void toggleWindowFrame()
+	void setWindowPos(WindowHandle _handle, int32_t _x, int32_t _y)
 	{
+		BX_UNUSED(_handle, _x, _y);
 	}
 
-	void setMouseLock(bool _lock)
+	void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
 	{
-		BX_UNUSED(_lock);
+		BX_UNUSED(_handle, _width, _height);
+	}
+
+	void setWindowTitle(WindowHandle _handle, const char* _title)
+	{
+		BX_UNUSED(_handle, _title);
+	}
+
+	void toggleWindowFrame(WindowHandle _handle)
+	{
+		BX_UNUSED(_handle);
+	}
+
+	void setMouseLock(WindowHandle _handle, bool _lock)
+	{
+		BX_UNUSED(_handle, _lock);
 	}
 
 	int32_t MainThreadEntry::threadFunc(void* _userData)

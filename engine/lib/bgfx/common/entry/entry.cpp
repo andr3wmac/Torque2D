@@ -17,6 +17,7 @@ extern "C" int _main_(int _argc, char** _argv);
 
 namespace entry
 {
+	const uint16_t WindowHandle::invalidHandle = UINT16_MAX;
 	static uint32_t s_debug = BGFX_DEBUG_NONE;
 	static uint32_t s_reset = BGFX_RESET_NONE;
 	static bool s_exit = false;
@@ -64,8 +65,11 @@ namespace entry
 	{
 		if (_argc > 1)
 		{
-			if (setOrToggle(s_reset, "vsync", BGFX_RESET_VSYNC,    1, _argc, _argv)
-			||  setOrToggle(s_reset, "msaa",  BGFX_RESET_MSAA_X16, 1, _argc, _argv) )
+			if (setOrToggle(s_reset, "vsync",       BGFX_RESET_VSYNC,        1, _argc, _argv)
+			||  setOrToggle(s_reset, "hmd",         BGFX_RESET_HMD,          1, _argc, _argv)
+			||  setOrToggle(s_reset, "hmddbg",      BGFX_RESET_HMD_DEBUG,    1, _argc, _argv)
+			||  setOrToggle(s_reset, "hmdrecenter", BGFX_RESET_HMD_RECENTER, 1, _argc, _argv)
+			||  setOrToggle(s_reset, "msaa",        BGFX_RESET_MSAA_X16,     1, _argc, _argv) )
 			{
 				return 0;
 			}
@@ -112,6 +116,8 @@ namespace entry
 		{ entry::Key::F1,    entry::Modifier::None,      1, cmd, "graphics stats"                    },
 		{ entry::Key::F1,    entry::Modifier::LeftShift, 1, cmd, "graphics stats 0\ngraphics text 0" },
 		{ entry::Key::F3,    entry::Modifier::None,      1, cmd, "graphics wireframe"                },
+		{ entry::Key::F4,    entry::Modifier::None,      1, cmd, "graphics hmd"                      },
+		{ entry::Key::F4,    entry::Modifier::LeftShift, 1, cmd, "graphics hmdrecenter"              },
 		{ entry::Key::F7,    entry::Modifier::None,      1, cmd, "graphics vsync"                    },
 		{ entry::Key::F8,    entry::Modifier::None,      1, cmd, "graphics msaa"                     },
 		{ entry::Key::Print, entry::Modifier::None,      1, cmd, "graphics screenshot"               },
@@ -134,7 +140,8 @@ namespace entry
 
 		inputAddBindings("bindings", s_bindings);
 
-		entry::setWindowTitle(bx::baseName(_argv[0]));
+		entry::WindowHandle defaultWindow = { 0 };
+		entry::setWindowTitle(defaultWindow, bx::baseName(_argv[0]));
 
 		int32_t result = ::_main_(_argc, _argv);
 
@@ -253,18 +260,14 @@ namespace entry
 		return ascii;
 	}
 
-	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset, MouseState* _mouse, KeyState* _keyboard)
+	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset, MouseState* _mouse)
 	{
 		s_debug = _debug;
 		s_reset = _reset;
 
-		bool mouseLock = inputIsMouseLocked();
+		WindowHandle handle = { UINT16_MAX };
 
-		if (NULL != _keyboard)
-		{
-			_keyboard->m_modifiers = 0;
-			memset(_keyboard->m_keysDown, 0, sizeof(_keyboard->m_keysDown) );
-		}
+		bool mouseLock = inputIsMouseLocked();
 
 		const Event* ev;
 		do
@@ -282,6 +285,7 @@ namespace entry
 				case Event::Mouse:
 					{
 						const MouseEvent* mouse = static_cast<const MouseEvent*>(ev);
+						handle = mouse->m_handle;
 
 						if (mouse->m_move)
 						{
@@ -312,26 +316,149 @@ namespace entry
 				case Event::Key:
 					{
 						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
+						handle = key->m_handle;
+
 						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
-
-						if (NULL != _keyboard)
-						{
-							_keyboard->m_modifiers |= key->m_modifiers;
-
-							if (key->m_down)
-							{
-								_keyboard->m_keysDown[key->m_key] = true;
-							}
-						}
 					}
 					break;
 
 				case Event::Size:
 					{
 						const SizeEvent* size = static_cast<const SizeEvent*>(ev);
-						_width = size->m_width;
+						handle  = size->m_handle;
+						_width  = size->m_width;
 						_height = size->m_height;
-						_reset = !s_reset; // force reset
+						_reset  = !s_reset; // force reset
+					}
+					break;
+
+				case Event::Window:
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			inputProcess();
+
+		} while (NULL != ev);
+
+		if (handle.idx == 0
+		&&  _reset != s_reset)
+		{
+			_reset = s_reset;
+			bgfx::reset(_width, _height, _reset);
+			inputSetMouseResolution(_width, _height);
+		}
+
+		_debug = s_debug;
+
+		return s_exit;
+	}
+
+	WindowState s_window[ENTRY_CONFIG_MAX_WINDOWS];
+
+	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset)
+	{
+		s_debug = _debug;
+		s_reset = _reset;
+
+		WindowHandle handle = { UINT16_MAX };
+
+		bool mouseLock = inputIsMouseLocked();
+
+		const Event* ev;
+		do
+		{
+			struct SE
+			{
+				SE(WindowHandle _handle)
+					: m_ev(poll(_handle) )
+				{
+				}
+				
+				~SE()
+				{
+					if (NULL != m_ev)
+					{
+						release(m_ev);
+					}
+				}
+
+				const Event* m_ev;
+
+			} scopeEvent(handle);
+			ev = scopeEvent.m_ev;
+
+			if (NULL != ev)
+			{
+				handle = ev->m_handle;
+				WindowState& win = s_window[handle.idx];
+
+				switch (ev->m_type)
+				{
+				case Event::Exit:
+					return true;
+
+				case Event::Mouse:
+					{
+						const MouseEvent* mouse = static_cast<const MouseEvent*>(ev);
+						win.m_handle = mouse->m_handle;
+
+						if (mouse->m_move)
+						{
+							inputSetMousePos(mouse->m_mx, mouse->m_my, mouse->m_mz);
+						}
+						else
+						{
+							inputSetMouseButtonState(mouse->m_button, mouse->m_down);
+						}
+
+						if (!mouseLock)
+						{
+							if (mouse->m_move)
+							{
+								win.m_mouse.m_mx = mouse->m_mx;
+								win.m_mouse.m_my = mouse->m_my;
+								win.m_mouse.m_mz = mouse->m_mz;
+							}
+							else
+							{
+								win.m_mouse.m_buttons[mouse->m_button] = mouse->m_down;
+							}
+						}
+					}
+					break;
+
+				case Event::Key:
+					{
+						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
+						win.m_handle = key->m_handle;
+
+						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
+					}
+					break;
+
+				case Event::Size:
+					{
+						const SizeEvent* size = static_cast<const SizeEvent*>(ev);
+						win.m_handle = size->m_handle;
+						win.m_width  = size->m_width;
+						win.m_height = size->m_height;
+						_reset  = win.m_handle.idx == 0
+								? !s_reset
+								: _reset
+								; // force reset
+					}
+					break;
+
+				case Event::Window:
+					{
+						const WindowEvent* window = static_cast<const WindowEvent*>(ev);
+						win.m_handle = window->m_handle;
+						win.m_nwh    = window->m_nwh;
+						ev = NULL;
 					}
 					break;
 
@@ -344,11 +471,22 @@ namespace entry
 
 		} while (NULL != ev);
 
+		if (isValid(handle) )
+		{
+			const WindowState& win = s_window[handle.idx];
+			_state = win;
+
+			if (handle.idx == 0)
+			{
+				inputSetMouseResolution(win.m_width, win.m_height);
+			}
+		}
+
 		if (_reset != s_reset)
 		{
 			_reset = s_reset;
-			bgfx::reset(_width, _height, _reset);
-			inputSetMouseResolution(_width, _height);
+			bgfx::reset(s_window[0].m_width, s_window[0].m_height, _reset);
+			inputSetMouseResolution(s_window[0].m_width, s_window[0].m_height);
 		}
 
 		_debug = s_debug;

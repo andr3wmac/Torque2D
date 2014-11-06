@@ -240,7 +240,7 @@ static void fons__tmpfree(void* ptr, void* up);
 #	include <string.h>
 #endif // 0
 
-// andrewmac: needed to add this to get it to compile.
+// andrewmac: Need this to compile.
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype/stb_truetype.h>
 

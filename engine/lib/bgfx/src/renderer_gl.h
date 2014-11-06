@@ -84,8 +84,9 @@ typedef uint64_t GLuint64;
 #	if BX_PLATFORM_EMSCRIPTEN
 #		include <emscripten/emscripten.h>
 #	endif // BX_PLATFORM_EMSCRIPTEN
-
 #endif // BGFX_CONFIG_RENDERER_OPENGL
+
+#include "ovr.h"
 
 #ifndef GL_LUMINANCE
 #	define GL_LUMINANCE 0x1909
@@ -599,6 +600,11 @@ namespace bgfx
 			m_hashMap.clear();
 		}
 
+		uint32_t getCount() const
+		{
+			return uint32_t(m_hashMap.size() );
+		}
+
 	private:
 		typedef stl::unordered_map<uint32_t, GLuint> HashMap;
 		HashMap m_hashMap;
@@ -669,6 +675,11 @@ namespace bgfx
 				GL_CHECK(glDeleteSamplers(1, &it->second) );
 			}
 			m_hashMap.clear();
+		}
+
+		uint32_t getCount() const
+		{
+			return uint32_t(m_hashMap.size() );
 		}
 
 	private:
@@ -815,19 +826,24 @@ namespace bgfx
 	struct FrameBufferGL
 	{
 		FrameBufferGL()
-			: m_num(0)
+			: m_swapChain(NULL)
+			, m_denseIdx(UINT16_MAX)
+			, m_num(0)
 		{
 			memset(m_fbo, 0, sizeof(m_fbo) );
 		}
 
 		void create(uint8_t _num, const TextureHandle* _handles);
-		void destroy();
+		void create(uint16_t _denseIdx, void* _nwh, uint32_t _width, uint32_t _height, TextureFormat::Enum _depthFormat);
+		uint16_t destroy();
 		void resolve();
 
-		uint8_t m_num;
+		SwapChainGL* m_swapChain;
 		GLuint m_fbo[2];
 		uint32_t m_width;
 		uint32_t m_height;
+		uint16_t m_denseIdx;
+		uint8_t m_num;
 	};
 
 	struct ProgramGL
