@@ -35,6 +35,7 @@
 #include <bgfxplatform.h>
 #include <nanovg.h>
 #include "graphics/dgl.h"
+#include "graphics/shaders.h"
 
 //------------------------------------------------------------------------------
 
@@ -855,10 +856,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    nvgCreateFont(nvgContext, "Arial Bold", "fonts/arialbd.ttf");
    nvgCreateFont(nvgContext, "Arial Italic", "fonts/ariali.ttf");
 
-   // Load Image Shader.
-   imageShader.idx = bgfx::invalidHandle;
-   u_texColor.idx = bgfx::invalidHandle;
-   dglLoadShader();
+   createShaderUniforms();
 
    return true;
 }

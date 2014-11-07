@@ -77,10 +77,6 @@
 #include "assets/assetManager.h"
 #endif
 
-#ifndef _PARTICLE_SYSTEM_H_
-#include "2d/core/ParticleSystem.h"
-#endif
-
 #ifdef TORQUE_OS_IOS
 #include "platformiOS/iOSProfiler.h"
 #endif
@@ -161,9 +157,6 @@ bool initializeLibraries()
     Math::init();
 
     Platform::init();    // platform specific initialization
-
-    // Initialize the particle system.
-    ParticleSystem::Init();
     
 #if defined(TORQUE_OS_IOS) && defined(_USE_STORE_KIT)
     storeInit();
@@ -202,9 +195,6 @@ void shutdownLibraries()
 
     PlatformAssert::destroy();
     Net::shutdown();
-
-    // Destroy the particle system.
-    ParticleSystem::destroy();
   
 #ifdef _USE_STORE_KIT
     storeCleanup();

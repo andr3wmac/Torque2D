@@ -38,6 +38,10 @@
 #include "io/fileObject.h"
 #endif
 
+#ifndef _SHADERS_H_
+#include "graphics/shaders.h"
+#endif
+
 #ifndef BGFX_H_HEADER_GUARD
 #include <bgfx.h>
 #endif
@@ -371,13 +375,7 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 static NVGcontext* nvgContext = NULL;
 NVGcontext* dglGetNVGContext();
 
-static bgfx::UniformHandle u_texColor;
-static bgfx::ProgramHandle imageShader;
-static bgfx::ShaderHandle mPixelShader;
-static bgfx::ShaderHandle mVertexShader;
-static FileObject* mPixelShaderFile = NULL;
-static FileObject* mVertexShaderFile = NULL;
-void dglLoadShader();
+static Shader* dglImageShader = NULL;
 
 void dglBeginFrame();
 void dglEndFrame();

@@ -286,6 +286,7 @@
     <ClCompile Include="..\..\source\2d\scene\SceneRenderFactories.cpp" />
     <ClCompile Include="..\..\source\2d\scene\SceneRenderQueue.cpp" />
     <ClCompile Include="..\..\source\2d\scene\WorldQuery.cc" />
+    <ClCompile Include="..\..\source\3d\test3D.cc" />
     <ClCompile Include="..\..\source\algorithm\crc.cc" />
     <ClCompile Include="..\..\source\algorithm\hashFunction.cc" />
     <ClCompile Include="..\..\source\assets\assetBase.cc" />
@@ -374,6 +375,7 @@
     <ClCompile Include="..\..\source\graphics\gFont.cc" />
     <ClCompile Include="..\..\source\graphics\gPalette.cc" />
     <ClCompile Include="..\..\source\graphics\PNGImage.cpp" />
+    <ClCompile Include="..\..\source\graphics\shaders.cc" />
     <ClCompile Include="..\..\source\graphics\splineUtil.cc" />
     <ClCompile Include="..\..\source\graphics\TextureDictionary.cc" />
     <ClCompile Include="..\..\source\graphics\TextureHandle.cc" />
@@ -737,6 +739,7 @@
     <ClInclude Include="..\..\source\2d\scene\WorldQuery.h" />
     <ClInclude Include="..\..\source\2d\scene\WorldQueryFilter.h" />
     <ClInclude Include="..\..\source\2d\scene\WorldQueryResult.h" />
+    <ClInclude Include="..\..\source\3d\test3D.h" />
     <ClInclude Include="..\..\source\algorithm\crc.h" />
     <ClInclude Include="..\..\source\algorithm\crctab.h" />
     <ClInclude Include="..\..\source\algorithm\hashFunction.h" />
@@ -875,6 +878,7 @@
     <ClInclude Include="..\..\source\graphics\gPalette.h" />
     <ClInclude Include="..\..\source\graphics\PNGImage.h" />
     <ClInclude Include="..\..\source\graphics\PNGImage_ScriptBinding.h" />
+    <ClInclude Include="..\..\source\graphics\shaders.h" />
     <ClInclude Include="..\..\source\graphics\splineUtil.h" />
     <ClInclude Include="..\..\source\graphics\TextureDictionary.h" />
     <ClInclude Include="..\..\source\graphics\TextureHandle.h" />

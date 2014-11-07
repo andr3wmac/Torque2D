@@ -199,6 +199,9 @@
     <Filter Include="spine">
       <UniqueIdentifier>{bb776838-ed6f-477c-b366-dd0c5c60ae5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3d">
+      <UniqueIdentifier>{23261709-dbac-4849-92a6-9cba834d9a27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\audio\audio.cc">
@@ -1427,6 +1430,12 @@
     </ClCompile>
     <ClCompile Include="..\..\source\platformWin32\winGLSpecial.cc">
       <Filter>platformWin32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\3d\test3D.cc">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\graphics\shaders.cc">
+      <Filter>graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3164,6 +3173,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\platformWin32\winGLSpecial_ScriptBinding.h">
       <Filter>platformWin32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\3d\test3D.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\graphics\shaders.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

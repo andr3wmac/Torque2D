@@ -24,6 +24,7 @@
 #include "graphics/TextureManager.h"
 #include "graphics/dgl.h"
 #include "graphics/color.h"
+#include "graphics/shaders.h"
 #include "math/mPoint.h"
 #include "math/mRect.h"
 #include "graphics/gFont.h"
@@ -87,6 +88,10 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
                        F32			 fSpin,
                        bool				bSilhouette)
 {	
+   // Temp Hack
+   if ( dglImageShader == NULL )
+      dglImageShader = new Shader("shaders/texture_vs.bin", "shaders/texture_fs.bin");
+
    AssertFatal(texture != NULL, "GSurface::drawBitmapStretchSR: NULL Handle");
    if(!dstRect.isValidRect())
       return;
@@ -95,9 +100,9 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
  
    dglScreenQuadSrc(dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y,
       srcRect.point.x, srcRect.point.y, srcRect.extent.x, srcRect.extent.y, texture->getTextureWidth(), texture->getTextureHeight());
-   bgfx::setTexture(0, u_texColor, texture->getBGFXTexture());
+   bgfx::setTexture(0, Shader::u_texColor, texture->getBGFXTexture());
 	bgfx::setState(BGFX_STATE_RGB_WRITE|BGFX_STATE_ALPHA_WRITE);
-	bgfx::setProgram(imageShader);
+   bgfx::setProgram(dglImageShader->mProgram);
 	bgfx::submit(1);
 }
 
@@ -1047,30 +1052,4 @@ void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height,
 void dglScreenQuad(U32 _x, U32 _y, U32 _width, U32 _height, bool _originBottomLeft)
 {
    dglScreenQuadSrc(_x, _y, _width, _height, 0, 0, _width, _height, _width, _height, _originBottomLeft);
-}
-
-void dglLoadShader()
-{
-   u_texColor = bgfx::createUniform("u_texColor", bgfx::UniformType::Uniform1i);
-
-   // Pixel (Fragment) Shader
-   mPixelShaderFile = new FileObject();
-   if ( mPixelShaderFile->readMemory("shaders/texture_fs.bin") )
-   {
-      const bgfx::Memory* mem = bgfx::makeRef(mPixelShaderFile->getBuffer(), mPixelShaderFile->getBufferSize());
-      mPixelShader = bgfx::createShader(mem);
-   }
-
-   // Vertex Shader
-   mVertexShaderFile = new FileObject();
-   if ( mVertexShaderFile->readMemory("shaders/texture_vs.bin") )
-   {
-      const bgfx::Memory* mem = bgfx::makeRef(mVertexShaderFile->getBuffer(), mVertexShaderFile->getBufferSize());
-      mVertexShader = bgfx::createShader(mem);
-   }
-
-   if ( mPixelShader.idx != bgfx::invalidHandle && mVertexShader.idx != bgfx::invalidHandle )
-   {
-      imageShader = bgfx::createProgram(mVertexShader, mPixelShader, true);
-   }
 }

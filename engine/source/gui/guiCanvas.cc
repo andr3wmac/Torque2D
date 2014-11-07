@@ -35,6 +35,7 @@
 #include "guiCanvas_ScriptBinding.h"
 
 #include <bgfx.h>
+#include "3d/test3D.h"
 
 // TODO: MOVE THIS:
 #define BGFXCOLOR_RGBA(r,g,b,a) \
@@ -1250,12 +1251,15 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
 		      , 0
 		   );
 
-         // TODO: This will *likely* be taken care of inside of the dglSetClipRect, but not sure yet.
-         bgfx::setViewRect(0, updateUnion.point.x, updateUnion.point.y, updateUnion.extent.x, updateUnion.extent.y);
-
          // Dummy submit to ensure viewport is cleared.
          bgfx::submit(0);
       }
+
+      // TODO: This will *likely* be taken care of inside of the dglSetClipRect, but not sure yet.
+      bgfx::setViewRect(0, updateUnion.point.x, updateUnion.point.y, updateUnion.extent.x, updateUnion.extent.y);
+
+      // Render 3D Test. 
+      test3DRender(size.x, size.y);
 
       // TODO: There should be a GUI pass specifically
       dglBeginFrame();
