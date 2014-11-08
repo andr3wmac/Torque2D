@@ -37,14 +37,22 @@ Shader::Shader(const char* vertex_shader_path, const char* pixel_shader_path)
    mProgram.idx = bgfx::invalidHandle;
 
    // Vertex Shader
-   if ( mVertexShaderFile.readMemory(vertex_shader_path) )
+   char vertex_compiled_path[256];
+   dSprintf(vertex_compiled_path, 256, "%s.bin", vertex_shader_path); 
+   bgfx::compileShader(0, vertex_shader_path, vertex_compiled_path, "v", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+
+   if ( mVertexShaderFile.readMemory(vertex_compiled_path) )
    {
       const bgfx::Memory* mem = bgfx::makeRef(mVertexShaderFile.getBuffer(), mVertexShaderFile.getBufferSize());
       mVertexShader = bgfx::createShader(mem);
    }
 
    // Pixel Shader
-   if ( mPixelShaderFile.readMemory(pixel_shader_path) )
+   char pixel_compiled_path[256];
+   dSprintf(pixel_compiled_path, 256, "%s.bin", pixel_shader_path); 
+   bgfx::compileShader(0, pixel_shader_path, pixel_compiled_path, "f", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+
+   if ( mPixelShaderFile.readMemory(pixel_compiled_path) )
    {
       const bgfx::Memory* mem = bgfx::makeRef(mPixelShaderFile.getBuffer(), mPixelShaderFile.getBufferSize());
       mPixelShader = bgfx::createShader(mem);

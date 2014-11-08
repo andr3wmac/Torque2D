@@ -115,7 +115,7 @@ void test3DRender(U32 width, U32 height)
       dwarf_texture = TextureHandle("models/dwarf.png", TextureHandle::TextureHandleType::BitmapTexture);
 
 	   // Create program from shaders.
-	   dwarf_shader = new Shader("shaders/dwarf_vs.bin", "shaders/dwarf_fs.bin");
+	   dwarf_shader = new Shader("shaders/dwarf_vs.sc", "shaders/dwarf_fs.sc");
    }
 
    // ---------------------

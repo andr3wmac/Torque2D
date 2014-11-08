@@ -62,7 +62,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TORQUE_DEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -92,7 +92,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -122,7 +122,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -149,8 +149,181 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp1.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp2.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp3.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp4.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp5.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\fcpp\cpp6.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_array_index.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_expr.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_function.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_to_hir.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast_type.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_functions.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_types.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_variables.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp-lex.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp-parse.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\pp.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_lexer.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_optimizer.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser_extras.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_symbol_table.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_types.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\hir_field_selection.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_basic_block.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_builder.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_clone.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_constant_expression.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_equals.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_expression_flattening.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function_can_inline.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function_detect_recursion.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_hierarchical_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_hv_accept.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_import_prototypes.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_glsl_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_metal_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_rvalue_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_stats.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_unused_structs.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_validate.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_variable_refcount.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\linker.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_atomics.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_functions.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_interface_blocks.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniforms.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_blocks.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_block_active_visitor.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_initializers.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_varyings.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_analysis.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_controls.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_unroll.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_clip_distance.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_discard.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_discard_flow.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_if_to_cond_assign.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_instructions.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_jumps.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_mat_op_to_vec.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_named_interface_blocks.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_noise.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_offset_array.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_output_reads.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_packed_varyings.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_packing_builtins.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_ubo_reference.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_variable_index_to_cond_assign.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vector.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vector_insert.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vec_index_to_cond_assign.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vec_index_to_swizzle.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\lower_vertex_id.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\main.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_algebraic.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_array_splitting.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_folding.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_propagation.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_constant_variable.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_copy_propagation.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_copy_propagation_elements.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_cse.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_builtin_variables.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_builtin_varyings.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_code.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_code_local.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_dead_functions.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_flatten_nested_if_blocks.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_flip_matrices.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_function_inlining.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_if_simplification.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_minmax.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_noop_swizzle.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_rebalance_tree.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_redundant_jumps.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_structure_splitting.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_swizzle_swizzle.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_tree_grafting.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_vectorize.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\opt_vector_splitting.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\standalone_scaffolding.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\strtod.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\s_expression.cpp" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\imports.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\prog_hash_table.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\symbol_table.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\util\hash_table.c" />
+    <ClCompile Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\util\ralloc.c" />
     <ClCompile Include="..\..\lib\bgfx\src\renderer_d3d12.cpp" />
     <ClCompile Include="..\..\lib\bgfx\tools\shaderc\shaderc.cpp" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\cpp.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\cppadd.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\cppdef.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\fpp.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\FPPBase.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\fpp_pragmas.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\fcpp\FPP_protos.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ast.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\builtin_type_macros.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp-parse.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glcpp\glcpp.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_optimizer.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_parser_extras.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_symbol_table.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\glsl_types.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_basic_block.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_builder.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_expression_flattening.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_function_inlining.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_hierarchical_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_optimization.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_glsl_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_metal_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_print_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_rvalue_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_stats.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_uniform.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_unused_structs.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_variable_refcount.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\ir_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\linker.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_uniform_block_active_visitor.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\link_varyings.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\list.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\loop_analysis.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\program.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\standalone_scaffolding.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\strtod.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\glsl\s_expression.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\compiler.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\config.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\context.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\core.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\dd.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\errors.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\glheader.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\glminimal.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\imports.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\macros.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\mtypes.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\main\simple_list.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\hash_table.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\prog_instruction.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\prog_parameter.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\prog_statevars.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\mesa\program\symbol_table.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\util\hash_table.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\util\macros.h" />
+    <ClInclude Include="..\..\lib\bgfx\3rdparty\glsl-optimizer\src\util\ralloc.h" />
     <ClInclude Include="..\..\lib\bgfx\common\aviwriter.h" />
     <ClCompile Include="..\..\lib\bgfx\common\bgfx_utils.cpp" />
     <ClInclude Include="..\..\lib\bgfx\common\bgfx_utils.h" />

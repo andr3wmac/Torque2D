@@ -90,7 +90,7 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
 {	
    // TODO: I hate loading things this way, will clean up later.
    if ( dglGUIShader == NULL )
-      dglGUIShader = new Shader("shaders/gui_vs.bin", "shaders/gui_fs.bin");
+      dglGUIShader = new Shader("shaders/gui_vs.sc", "shaders/gui_fs.sc");
 
    AssertFatal(texture != NULL, "GSurface::drawBitmapStretchSR: NULL Handle");
    if(!dstRect.isValidRect())

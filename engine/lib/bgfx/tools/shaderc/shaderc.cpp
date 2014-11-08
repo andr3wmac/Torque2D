@@ -2045,7 +2045,7 @@ int bgfx::compileShader(uint64_t flags,
 	return EXIT_FAILURE;
 }
 
-int main(int _argc, const char* _argv[])
+/*int main(int _argc, const char* _argv[])
 {
 	bx::CommandLine cmdLine(_argc, _argv);
 
@@ -2135,4 +2135,4 @@ int main(int _argc, const char* _argv[])
    const char* varyingdef = cmdLine.findOption("varyingdef", "" );
 
    return bgfx::compileShader(flags, filePath, outFilePath, type, platform, profile, bin2c, includeDir, varyingdef);
-}
+}*/
