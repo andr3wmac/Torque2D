@@ -5,6 +5,12 @@
 #include <bgfx.h>
 #include <bx/fpumath.h>
 
+// assimp include files. 
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/types.h>
+
 struct PosColorVertex
 {
 	F32 m_x;
@@ -63,6 +69,15 @@ void test3DRender(U32 width, U32 height)
 {
    if ( cubeShader == NULL )
    {
+      // Test Assimp.
+      const struct aiScene* mScene = aiImportFile("models/spider.obj", aiProcessPreset_TargetRealtime_MaxQuality);
+      if ( mScene )
+      {
+         Con::printf("[ASSIMP] Mesh Count: %d", mScene->mNumMeshes);
+         Con::printf("[ASSIMP] Material Count: %d", mScene->mNumMaterials);
+         aiReleaseImport(mScene);
+      }
+
       // Create vertex stream declaration.
 	   PosColorVertex::init();
 
