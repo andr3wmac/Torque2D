@@ -856,6 +856,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    nvgCreateFont(nvgContext, "Arial Bold", "fonts/arialbd.ttf");
    nvgCreateFont(nvgContext, "Arial Italic", "fonts/ariali.ttf");
 
+   // TODO: replace this with a proper uniform handling system.
    createShaderUniforms();
 
    return true;
@@ -865,6 +866,7 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
 //------------------------------------------------------------------------------
 void BGFXDevice::swapBuffers()
 {
+   // This tells bgfx we're done with this frame.
    bgfx::frame();
 }
 
@@ -929,12 +931,12 @@ bool BGFXDevice::setVerticalSync( bool on )
 //------------------------------------------------------------------------------
 DisplayDevice* BGFXDevice::create()
 {
-    BGFXDevice* newBGFXDevice = new BGFXDevice();
-    if ( newBGFXDevice )
+   BGFXDevice* newBGFXDevice = new BGFXDevice();
+   if ( newBGFXDevice )
 	{
 		newBGFXDevice->mFullScreenOnly = false;
-        return (DisplayDevice*) newBGFXDevice;
+      return (DisplayDevice*) newBGFXDevice;
 	}
-    else
-        return NULL;
+   else
+      return NULL;
 }

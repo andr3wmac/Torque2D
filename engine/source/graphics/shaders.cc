@@ -50,7 +50,7 @@ Shader::Shader(const char* vertex_shader_path, const char* pixel_shader_path)
       mPixelShader = bgfx::createShader(mem);
    }
 
-   // Load Actualy Program
+   // Load Program
    if ( mPixelShader.idx != bgfx::invalidHandle && mVertexShader.idx != bgfx::invalidHandle )
    {
       mProgram = bgfx::createProgram(mVertexShader, mPixelShader, true);

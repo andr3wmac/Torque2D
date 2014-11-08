@@ -375,7 +375,7 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 static NVGcontext* nvgContext = NULL;
 NVGcontext* dglGetNVGContext();
 
-static Shader* dglImageShader = NULL;
+static Shader* dglGUIShader = NULL;
 
 void dglBeginFrame();
 void dglEndFrame();

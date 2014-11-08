@@ -50,4 +50,4 @@ public:
 
 void createShaderUniforms();
 
-#endif //_GPALETTE_H_
+#endif //_SHADERS_H_

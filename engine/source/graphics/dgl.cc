@@ -88,9 +88,9 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
                        F32			 fSpin,
                        bool				bSilhouette)
 {	
-   // Temp Hack
-   if ( dglImageShader == NULL )
-      dglImageShader = new Shader("shaders/texture_vs.bin", "shaders/texture_fs.bin");
+   // TODO: I hate loading things this way, will clean up later.
+   if ( dglGUIShader == NULL )
+      dglGUIShader = new Shader("shaders/gui_vs.bin", "shaders/gui_fs.bin");
 
    AssertFatal(texture != NULL, "GSurface::drawBitmapStretchSR: NULL Handle");
    if(!dstRect.isValidRect())
@@ -102,7 +102,7 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
       srcRect.point.x, srcRect.point.y, srcRect.extent.x, srcRect.extent.y, texture->getTextureWidth(), texture->getTextureHeight());
    bgfx::setTexture(0, Shader::u_texColor, texture->getBGFXTexture());
 	bgfx::setState(BGFX_STATE_RGB_WRITE|BGFX_STATE_ALPHA_WRITE);
-   bgfx::setProgram(dglImageShader->mProgram);
+   bgfx::setProgram(dglGUIShader->mProgram);
 	bgfx::submit(1);
 }
 
@@ -987,6 +987,7 @@ void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height,
                       F32 _srcx, F32 _srcy, F32 _srcwidth, F32 _srcheight, F32 _srcimgwidth, F32 _srcimgheight,
                       bool _originBottomLeft)
 {
+   // TODO: Shouldn't be creating a vertex definition every goddamn frame.
    bgfx::VertexDecl decl;
    decl.begin();
    decl.add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float);
@@ -1007,6 +1008,7 @@ void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height,
 		const float maxx = minx+widthf;
 		const float maxy = miny+heightf;
 
+      // TODO: Check if we're using DX9, account for half-texel offset.
       F32 m_halfTexel = 0.0f;
 		const float texelHalfW = m_halfTexel/widthf;
 		const float texelHalfH = m_halfTexel/heightf;

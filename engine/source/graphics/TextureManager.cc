@@ -650,6 +650,7 @@ void TextureManager::refresh( TextureObject* pTextureObject )
 			 mem = bgfx::alloc(pNewBitmap->getHeight() * pitch);
 			 bgfx::imageSwizzleBgra8(pNewBitmap->getWidth(), pNewBitmap->getHeight(), pitch, bits, mem->data);
 
+          // Load texture into bgfx.
 		    pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth()
 						   , pNewBitmap->getHeight()
 						   , 1
@@ -658,10 +659,11 @@ void TextureManager::refresh( TextureObject* pTextureObject )
 						   , mem
 						   );
        
-          // Load Into NanoVG
+          // Load Into NanoVG (this should probably be optional, or find a way to let them share.)
           pTextureObject->mNVGImage = nvgCreateImageRGBA(dglGetNVGContext(), pNewBitmap->getWidth(), pNewBitmap->getHeight(), bits);
        }
 
+       // TODO: Finish texture loading in all its glorious forms.
        if ( pNewBitmap->getFormat() == GBitmap::BitmapFormat::Alpha )
           pTextureObject->mBGFXTexture = bgfx::createTexture2D(pNewBitmap->getWidth(), pNewBitmap->getHeight(), 0, bgfx::TextureFormat::R8, BGFX_TEXTURE_MIN_POINT|BGFX_TEXTURE_MAG_POINT|BGFX_TEXTURE_MIP_POINT);
 

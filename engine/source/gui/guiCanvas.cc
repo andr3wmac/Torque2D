@@ -1256,15 +1256,20 @@ void GuiCanvas::renderFrame(bool preRenderOnly, bool bufferSwap /* = true */)
       }
 
       // TODO: This will *likely* be taken care of inside of the dglSetClipRect, but not sure yet.
+      //       There is also a nvgScissor ability that clips the area you draw in. Will investigate later.
       bgfx::setViewRect(0, updateUnion.point.x, updateUnion.point.y, updateUnion.extent.x, updateUnion.extent.y);
 
-      // Render 3D Test. 
+      // NOTE: All the 3D stuff is running on view 0, all the GUI is on view 1.
+
+      // Render 3D Test. Probably shouldn't be done inside canvas. 
+      // Definately shouldn't be done in between dglBegin/EndFrame.
+      // dgl should be refactored into gui specific I think.
       test3DRender(size.x, size.y);
 
-      // TODO: There should be a GUI pass specifically
+      // Need to wrap nanovg calls in begin/end.
       dglBeginFrame();
 
-      //render the dialogs
+      // Render the dialogs
       iterator i;
       for(i = begin(); i != end(); i++)
       {
