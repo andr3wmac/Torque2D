@@ -36,10 +36,15 @@ Shader::Shader(const char* vertex_shader_path, const char* pixel_shader_path)
    mVertexShader.idx = bgfx::invalidHandle;
    mProgram.idx = bgfx::invalidHandle;
 
+   bool is_dx9 = (bgfx::getRendererType() == bgfx::RendererType::Direct3D9);
+
    // Vertex Shader
    char vertex_compiled_path[256];
    dSprintf(vertex_compiled_path, 256, "%s.bin", vertex_shader_path); 
-   bgfx::compileShader(0, vertex_shader_path, vertex_compiled_path, "v", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+   if ( is_dx9 )
+      bgfx::compileShader(0, vertex_shader_path, vertex_compiled_path, "v", "windows", "vs_3_0", NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+   else
+      bgfx::compileShader(0, vertex_shader_path, vertex_compiled_path, "v", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
 
    if ( mVertexShaderFile.readMemory(vertex_compiled_path) )
    {
@@ -50,7 +55,10 @@ Shader::Shader(const char* vertex_shader_path, const char* pixel_shader_path)
    // Pixel Shader
    char pixel_compiled_path[256];
    dSprintf(pixel_compiled_path, 256, "%s.bin", pixel_shader_path); 
-   bgfx::compileShader(0, pixel_shader_path, pixel_compiled_path, "f", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+   if ( is_dx9 )
+      bgfx::compileShader(0, pixel_shader_path, pixel_compiled_path, "f", "windows", "ps_3_0", NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
+   else
+      bgfx::compileShader(0, pixel_shader_path, pixel_compiled_path, "f", "linux", NULL, NULL, "shaders/includes/", "shaders/includes/varying.def.sc");
 
    if ( mPixelShaderFile.readMemory(pixel_compiled_path) )
    {

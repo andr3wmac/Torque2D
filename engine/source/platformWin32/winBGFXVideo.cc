@@ -37,6 +37,34 @@
 #include "graphics/dgl.h"
 #include "graphics/shaders.h"
 
+
+#define _BX_TRACE(_format, ...) \
+				BX_MACRO_BLOCK_BEGIN \
+					Con::printf("%s", BX_FILE_LINE_LITERAL "" _format "\n", ##__VA_ARGS__); \
+				BX_MACRO_BLOCK_END
+
+#define _BX_WARN(_condition, _format, ...) \
+				BX_MACRO_BLOCK_BEGIN \
+					if (!(_condition) ) \
+					{ \
+						BX_TRACE("WARN " _format, ##__VA_ARGS__); \
+					} \
+				BX_MACRO_BLOCK_END
+
+#define _BX_CHECK(_condition, _format, ...) \
+				BX_MACRO_BLOCK_BEGIN \
+					if (!(_condition) ) \
+					{ \
+						BX_TRACE("CHECK " _format, ##__VA_ARGS__); \
+						bx::debugBreak(); \
+					} \
+				BX_MACRO_BLOCK_END
+
+#define BX_TRACE _BX_TRACE
+#define BX_WARN  _BX_WARN
+#define BX_CHECK _BX_CHECK
+
+
 //------------------------------------------------------------------------------
 
 struct CardProfile
@@ -845,7 +873,8 @@ bool BGFXDevice::setScreenMode( U32 width, U32 height, U32 bpp, bool fullScreen,
    }
 
    bgfx::winSetHwnd(winState.appWindow);
-   bgfx::init(bgfx::RendererType::OpenGL);
+   bgfx::init(); // This will auto-select "best" api for platform.
+   // bgfx::init(bgfx::RendererType::OpenGL);
    bgfx::reset(width, height, BGFX_RESET_NONE);
 
    // Loadup nanoVG + base fonts (TODO: replace this with proper font system)
