@@ -74,7 +74,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TORQUE_DEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -104,7 +104,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -134,7 +134,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../lib/bx/include;../../lib/bgfx/include;../../lib/bgfx/include/compat/msvc;../../lib/bgfx/3rdparty;../../lib/bgfx/3rdparty/khronos;../../lib/bgfx/3rdparty/fcpp;../../lib/bgfx/3rdparty/glsl-optimizer/include;../../lib/bgfx/3rdparty/glsl-optimizer/src/glsl;../../lib/bgfx/3rdparty/glsl-optimizer/src/mapi;../../lib/bgfx/3rdparty/glsl-optimizer/src/mesa;../../lib/bgfx/3rdparty/glsl-optimizer/src/getopt;../../lib/bgfx/3rdparty/glsl-optimizer/src/;$(DXSDK_DIR)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

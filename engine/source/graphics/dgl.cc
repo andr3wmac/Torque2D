@@ -101,9 +101,9 @@ void dglDrawBitmapStretchSR(TextureObject* texture,
    dglScreenQuadSrc(dstRect.point.x, dstRect.point.y, dstRect.extent.x, dstRect.extent.y,
       srcRect.point.x, srcRect.point.y, srcRect.extent.x, srcRect.extent.y, texture->getTextureWidth(), texture->getTextureHeight());
    bgfx::setTexture(0, Shader::u_texColor, texture->getBGFXTexture());
-	bgfx::setState(BGFX_STATE_RGB_WRITE|BGFX_STATE_ALPHA_WRITE);
+   bgfx::setState(BGFX_STATE_RGB_WRITE|BGFX_STATE_ALPHA_WRITE);
    bgfx::setProgram(dglGUIShader->mProgram);
-	bgfx::submit(1);
+   bgfx::submit(1);
 }
 
 void dglDrawBitmap(TextureObject* texture, const Point2I& in_rAt, const U32 in_flip)
@@ -266,7 +266,7 @@ U32 dglDrawTextN(GFont*          font,
       nvgFillColor(nvgContext, nvgRGBA(colorTable[0].red, colorTable[0].green, colorTable[0].blue, colorTable[0].alpha));
       
    nvgTextAlign(nvgContext, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-	nvgText(nvgContext, ptDraw.x, ptDraw.y, text, NULL);
+   
 
    return ptDraw.x;
 }
@@ -353,9 +353,9 @@ void dglDrawRectFill(const Point2I &upperL, const Point2I &lowerR, const ColorI 
    if ( !nvg ) return;
   
    nvgBeginPath(nvg);
-	nvgRect(nvg, upperL.x, upperL.y, lowerR.x - upperL.x, lowerR.y - upperL.y);
-	nvgFillColor(nvg, nvgRGBA(color.red, color.green, color.blue, color.alpha));
-	nvgFill(nvg);
+   nvgRect(nvg, upperL.x, upperL.y, lowerR.x - upperL.x, lowerR.y - upperL.y);
+   nvgFillColor(nvg, nvgRGBA(color.red, color.green, color.blue, color.alpha));
+   nvgFill(nvg);
 }
 void dglDrawRectFill(const RectI &rect, const ColorI &color)
 {
@@ -972,9 +972,9 @@ void dglBeginFrame()
 
    // GUI Orthographic Projection
    float ortho[16];
-	bx::mtxOrtho(ortho, 0.0f, (float)size.x, (float)size.y, 0.0f, 0.0f, 1000.0f);
-	bgfx::setViewTransform(1, NULL, ortho);
-	bgfx::setViewRect(1, 0, 0, size.x, size.y);
+   bx::mtxOrtho(ortho, 0.0f, (float)size.x, (float)size.y, 0.0f, 0.0f, 1000.0f);
+   bgfx::setViewTransform(1, NULL, ortho);
+   bgfx::setViewRect(1, 0, 0, size.x, size.y);
 }
 
 void dglEndFrame()
@@ -991,64 +991,63 @@ void dglScreenQuadSrc(U32 _x, U32 _y, U32 _width, U32 _height,
    bgfx::VertexDecl decl;
    decl.begin();
    decl.add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float);
-	decl.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float);
-	decl.end();
+   decl.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float);
+   decl.end();
 
-	if (bgfx::checkAvailTransientVertexBuffer(6, decl) )
-	{
-		bgfx::TransientVertexBuffer vb;
-		bgfx::allocTransientVertexBuffer(&vb, 6, decl);
-		PosUvVertex* vertex = (PosUvVertex*)vb.data;
+   if (bgfx::checkAvailTransientVertexBuffer(6, decl) )
+   {
+      bgfx::TransientVertexBuffer vb;
+      bgfx::allocTransientVertexBuffer(&vb, 6, decl);
+      PosUvVertex* vertex = (PosUvVertex*)vb.data;
 
-		const float widthf  = float(_width);
-		const float heightf = float(_height);
+      const float widthf  = float(_width);
+      const float heightf = float(_height);
 
-		const float minx = float(_x);
-		const float miny = float(_y);
-		const float maxx = minx+widthf;
-		const float maxy = miny+heightf;
+      const float minx = float(_x);
+      const float miny = float(_y);
+      const float maxx = minx+widthf;
+      const float maxy = miny+heightf;
 
-      // TODO: Check if we're using DX9, account for half-texel offset.
-      F32 m_halfTexel = 0.0f;
-		const float texelHalfW = m_halfTexel/widthf;
-		const float texelHalfH = m_halfTexel/heightf;
-		const float minu = texelHalfW + (_srcx / _srcimgwidth);
-		const float maxu = ((_srcx + _srcwidth) / _srcimgwidth) - texelHalfW;
-		const float minv = _originBottomLeft ? texelHalfH + ((_srcy + _srcheight) / _srcimgheight) : texelHalfH + (_srcy / _srcimgheight);
-		const float maxv = _originBottomLeft ? texelHalfH + (_srcy / _srcimgheight) : texelHalfH + ((_srcy + _srcheight) / _srcimgheight);
+      F32 m_halfTexel = (bgfx::getRendererType() == bgfx::RendererType::Direct3D9) ? 0.5f : 0.0f;
+      const float texelHalfW = m_halfTexel/_srcimgwidth;
+      const float texelHalfH = m_halfTexel/_srcimgheight;
+      const float minu = texelHalfW + (_srcx / _srcimgwidth);
+      const float maxu = ((_srcx + _srcwidth) / _srcimgwidth) - texelHalfW;
+      const float minv = _originBottomLeft ? texelHalfH + ((_srcy + _srcheight) / _srcimgheight) : texelHalfH + (_srcy / _srcimgheight);
+      const float maxv = _originBottomLeft ? texelHalfH + (_srcy / _srcimgheight) : texelHalfH + ((_srcy + _srcheight) / _srcimgheight);
 
-		vertex[0].m_x = minx;
-		vertex[0].m_y = miny;
-		vertex[0].m_u = minu;
-		vertex[0].m_v = minv;
+      vertex[0].m_x = minx;
+      vertex[0].m_y = miny;
+      vertex[0].m_u = minu;
+      vertex[0].m_v = minv;
 
-		vertex[1].m_x = maxx;
-		vertex[1].m_y = miny;
-		vertex[1].m_u = maxu;
-		vertex[1].m_v = minv;
+      vertex[1].m_x = maxx;
+      vertex[1].m_y = miny;
+      vertex[1].m_u = maxu;
+      vertex[1].m_v = minv;
 
-		vertex[2].m_x = maxx;
-		vertex[2].m_y = maxy;
-		vertex[2].m_u = maxu;
-		vertex[2].m_v = maxv;
+      vertex[2].m_x = maxx;
+      vertex[2].m_y = maxy;
+      vertex[2].m_u = maxu;
+      vertex[2].m_v = maxv;
 
-		vertex[3].m_x = maxx;
-		vertex[3].m_y = maxy;
-		vertex[3].m_u = maxu;
-		vertex[3].m_v = maxv;
+      vertex[3].m_x = maxx;
+      vertex[3].m_y = maxy;
+      vertex[3].m_u = maxu;
+      vertex[3].m_v = maxv;
 
-		vertex[4].m_x = minx;
-		vertex[4].m_y = maxy;
-		vertex[4].m_u = minu;
-		vertex[4].m_v = maxv;
+      vertex[4].m_x = minx;
+      vertex[4].m_y = maxy;
+      vertex[4].m_u = minu;
+      vertex[4].m_v = maxv;
 
-		vertex[5].m_x = minx;
-		vertex[5].m_y = miny;
-		vertex[5].m_u = minu;
-		vertex[5].m_v = minv;
+      vertex[5].m_x = minx;
+      vertex[5].m_y = miny;
+      vertex[5].m_u = minu;
+      vertex[5].m_v = minv;
 
-		bgfx::setVertexBuffer(&vb);
-	}
+      bgfx::setVertexBuffer(&vb);
+   }
 }
 
 void dglScreenQuad(U32 _x, U32 _y, U32 _width, U32 _height, bool _originBottomLeft)
